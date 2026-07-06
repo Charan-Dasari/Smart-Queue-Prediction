@@ -11,6 +11,8 @@ public class LoginRequest
 
     [Required]
     public string Password { get; set; } = string.Empty;
+
+    public bool IsWeb { get; set; } = false;
 }
 
 public class RegisterRequest
@@ -98,14 +100,8 @@ public class ProviderDto
 
 public class CreateProviderRequest
 {
-    [Required, MaxLength(200)]
-    public string Name { get; set; } = string.Empty;
-
     [Required]
-    public ServiceCategory Category { get; set; }
-
-    [MaxLength(500)]
-    public string Address { get; set; } = string.Empty;
+    public Guid PlaceId { get; set; }
 }
 
 public class ProviderWithServicesDto : ProviderDto
@@ -187,8 +183,7 @@ public class BookAppointmentRequest
     [Required]
     public Guid ServiceId { get; set; }
 
-    [Required]
-    public Guid TimeSlotId { get; set; }
+    public Guid? TimeSlotId { get; set; }
 
     [Required]
     public DateTime Date { get; set; }
@@ -277,14 +272,14 @@ public class AdminDashboardDto
     public int ServedToday { get; set; }
     public double SatisfactionScore { get; set; }
     public string ProviderName { get; set; } = string.Empty;
-    public ServiceCategory ProviderCategory { get; set; }
+    public string ProviderCategory { get; set; } = string.Empty;
 }
 
 public class StaffDashboardDto
 {
     public string StaffName { get; set; } = string.Empty;
     public string ProviderName { get; set; } = string.Empty;
-    public ServiceCategory ProviderCategory { get; set; }
+    public string ProviderCategory { get; set; } = string.Empty;
     public CounterDto? AssignedCounter { get; set; }
     public string? CurrentlyServing { get; set; }
     public int WaitingCount { get; set; }
@@ -316,4 +311,16 @@ public class UpdateRoleRequest
 {
     [Required]
     public UserRole Role { get; set; }
+}
+
+// ── Place DTOs ──
+public class PlaceDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public double Rating { get; set; }
 }

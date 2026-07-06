@@ -12,6 +12,8 @@ public class ServiceProvider
 
     public ServiceCategory Category { get; set; }
 
+    public long? OsmNodeId { get; set; }
+
     [MaxLength(500)]
     public string Address { get; set; } = string.Empty;
 

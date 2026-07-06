@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Smart_Queue.Data;
 
@@ -11,9 +12,11 @@ using Smart_Queue.Data;
 namespace Smart_Queue.Migrations
 {
     [DbContext(typeof(SmartQueueDbContext))]
-    partial class SmartQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260703140241_AddOsmNodeId")]
+    partial class AddOsmNodeId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,34 +101,6 @@ namespace Smart_Queue.Migrations
                     b.ToTable("Appointments");
                 });
 
-            modelBuilder.Entity("Smart_Queue.Models.ClaimRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ProviderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ClaimRequests");
-                });
-
             modelBuilder.Entity("Smart_Queue.Models.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -161,54 +136,6 @@ namespace Smart_Queue.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("Smart_Queue.Models.Place", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<double>("Rating")
-                        .HasColumnType("float");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Category");
-
-                    b.HasIndex("City");
-
-                    b.HasIndex("State");
-
-                    b.ToTable("Places");
                 });
 
             modelBuilder.Entity("Smart_Queue.Models.QueueToken", b =>
@@ -522,17 +449,6 @@ namespace Smart_Queue.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("TimeSlot");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Smart_Queue.Models.ClaimRequest", b =>
-                {
-                    b.HasOne("Smart_Queue.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

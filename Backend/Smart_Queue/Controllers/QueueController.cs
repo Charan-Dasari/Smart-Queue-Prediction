@@ -68,6 +68,10 @@ public class QueueController : ControllerBase
     public async Task<IActionResult> GetTracking(Guid tokenId)
     {
         var token = await _queueService.GetTrackingInfoAsync(tokenId);
+        if (token == null)
+        {
+            token = await _queueService.GetTrackingInfoByAppointmentIdAsync(tokenId);
+        }
         if (token == null) return NotFound();
         return Ok(token);
     }

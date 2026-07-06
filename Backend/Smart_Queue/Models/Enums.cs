@@ -14,6 +14,8 @@ public enum ServiceCategory
     Bank,
     GovtOffice,
     College,
+    Restaurant,
+    Hotel,
     Other
 }
 

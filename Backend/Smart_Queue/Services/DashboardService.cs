@@ -58,17 +58,18 @@ public class DashboardService
     public async Task<AdminDashboardDto> GetAdminDashboardAsync(Guid providerId)
     {
         var todayStart = DateTime.UtcNow.Date;
-        var provider = await _db.ServiceProviders.FindAsync(providerId);
+        var provider = await _db.Places.FindAsync(providerId);
 
         var todayAppointments = await _db.Appointments.CountAsync(a => a.ProviderId == providerId && a.Date >= todayStart);
         var activeQueues = await _db.QueueTokens.CountAsync(t => t.ProviderId == providerId && (t.Status == AppointmentStatus.InQueue || t.Status == AppointmentStatus.Serving));
         var servedToday = await _db.QueueTokens.CountAsync(t => t.ProviderId == providerId && t.Status == AppointmentStatus.Completed && t.CompletedAt >= todayStart);
 
-        var avgWait = await _db.QueueTokens
+        var waitTimes = await _db.QueueTokens
             .Where(t => t.ProviderId == providerId && t.Status == AppointmentStatus.Completed && t.CompletedAt >= todayStart && t.ServedAt != null)
             .Select(t => EF.Functions.DateDiffMinute(t.CreatedAt, t.ServedAt!.Value))
-            .DefaultIfEmpty(0)
-            .AverageAsync();
+            .ToListAsync();
+
+        var avgWait = waitTimes.Count > 0 ? waitTimes.Average() : 0;
 
         return new AdminDashboardDto
         {
@@ -77,18 +78,19 @@ public class DashboardService
             AvgWaitMinutes = (int)avgWait,
             TodayVisitors = servedToday + activeQueues,
             ServedToday = servedToday,
-            SatisfactionScore = 4.6,
+            SatisfactionScore = provider?.Rating ?? 0.0,
             ProviderName = provider?.Name ?? "",
-            ProviderCategory = provider?.Category ?? ServiceCategory.Other,
+            ProviderCategory = provider?.Category ?? "Other",
         };
     }
 
     public async Task<StaffDashboardDto> GetStaffDashboardAsync(Guid staffUserId)
     {
-        var user = await _db.Users.Include(u => u.Provider).FirstOrDefaultAsync(u => u.Id == staffUserId);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == staffUserId);
         if (user?.ProviderId == null) return new StaffDashboardDto();
 
         var providerId = user.ProviderId.Value;
+        var provider = await _db.Places.FindAsync(providerId);
 
         var counter = await _db.ServiceCounters
             .Include(c => c.ActiveToken)
@@ -112,8 +114,8 @@ public class DashboardService
         return new StaffDashboardDto
         {
             StaffName = user.Name,
-            ProviderName = user.Provider?.Name ?? "",
-            ProviderCategory = user.Provider?.Category ?? ServiceCategory.Other,
+            ProviderName = provider?.Name ?? "",
+            ProviderCategory = provider?.Category ?? "Other",
             AssignedCounter = counter != null ? new CounterDto
             {
                 Id = counter.Id,

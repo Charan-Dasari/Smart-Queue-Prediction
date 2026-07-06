@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Smart_Queue.Data;
 
@@ -11,9 +12,11 @@ using Smart_Queue.Data;
 namespace Smart_Queue.Migrations
 {
     [DbContext(typeof(SmartQueueDbContext))]
-    partial class SmartQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260705091848_SyncPendingChanges")]
+    partial class SyncPendingChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

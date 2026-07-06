@@ -10,13 +10,14 @@ namespace Smart_Queue.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class CountersController : ControllerBase
 {
     private readonly SmartQueueDbContext _db;
 
     public CountersController(SmartQueueDbContext db) => _db = db;
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("provider")]
     public async Task<IActionResult> GetProviderCounters()
     {
@@ -45,6 +46,7 @@ public class CountersController : ControllerBase
         return Ok(counters);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCounterRequest request)
     {
@@ -72,6 +74,7 @@ public class CountersController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}/assign")]
     public async Task<IActionResult> Assign(Guid id, [FromBody] AssignCounterRequest request)
     {
@@ -109,6 +112,7 @@ public class CountersController : ControllerBase
         return Ok(new { status = counter.Status.ToString() });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

@@ -17,10 +17,20 @@ public class SmartQueueDbContext : DbContext
     public DbSet<ServiceCounter> ServiceCounters => Set<ServiceCounter>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+    public DbSet<Place> Places => Set<Place>();
+    public DbSet<ClaimRequest> ClaimRequests => Set<ClaimRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // ── Place ──
+        modelBuilder.Entity<Place>(e =>
+        {
+            e.HasIndex(p => p.Category);
+            e.HasIndex(p => p.State);
+            e.HasIndex(p => p.City);
+        });
 
         // ── User ──
         modelBuilder.Entity<User>(e =>

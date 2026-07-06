@@ -238,6 +238,20 @@ public class QueueService
         return token == null ? null : MapToDto(token);
     }
 
+    public async Task<QueueTokenDto?> GetTrackingInfoByAppointmentIdAsync(Guid appointmentId)
+    {
+        var appointment = await _db.Appointments.FindAsync(appointmentId);
+        if (appointment == null) return null;
+
+        var token = await _db.QueueTokens
+            .Include(t => t.Provider)
+            .Include(t => t.Service)
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.TokenNumber == appointment.TokenNumber && t.ProviderId == appointment.ProviderId);
+
+        return token == null ? null : MapToDto(token);
+    }
+
     public static QueueTokenDto MapToDto(QueueToken token) => new()
     {
         Id = token.Id,

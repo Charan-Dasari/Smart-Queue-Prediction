@@ -98,9 +98,13 @@ public class AppointmentsController : ControllerBase
         var userId = GetUserId();
 
         // Validate time slot
-        var timeSlot = await _db.TimeSlots.FindAsync(request.TimeSlotId);
-        if (timeSlot == null || timeSlot.AvailableSlots <= 0)
-            return BadRequest(new { message = "Selected time slot is not available" });
+        TimeSlot? timeSlot = null;
+        if (request.TimeSlotId.HasValue)
+        {
+            timeSlot = await _db.TimeSlots.FindAsync(request.TimeSlotId.Value);
+            if (timeSlot == null || timeSlot.AvailableSlots <= 0)
+                return BadRequest(new { message = "Selected time slot is not available" });
+        }
 
         // Create queue token
         var queueToken = await _queueService.CreateTokenAsync(userId, request.ProviderId, request.ServiceId);
@@ -120,7 +124,10 @@ public class AppointmentsController : ControllerBase
         _db.Appointments.Add(appointment);
 
         // Decrease available slots
-        timeSlot.AvailableSlots--;
+        if (timeSlot != null)
+        {
+            timeSlot.AvailableSlots--;
+        }
 
         await _db.SaveChangesAsync();
 

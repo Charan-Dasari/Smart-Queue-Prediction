@@ -11,7 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ──
 builder.Services.AddDbContext<SmartQueueDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        sqlServerOptionsAction: sqlOptions =>
+        {
+            sqlOptions.CommandTimeout(120);
+        }));
 
 // ── JWT Authentication ──
 var jwtConfig = builder.Configuration.GetSection("Jwt");
@@ -41,6 +45,7 @@ builder.Services.AddAuthorization();
 
 // ── Services (DI) ──
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<QueueService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<DashboardService>();
@@ -74,7 +79,19 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartQueueDbContext>();
     await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(db);
+    // await DbSeeder.SeedAsync(db); // Disabled dummy seeding per user request
+
+    // Import CSV datasets into Places table
+    var datasetsFolder = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Datasets_Clean");
+    var resolvedPath = Path.GetFullPath(datasetsFolder);
+    if (Directory.Exists(resolvedPath))
+    {
+        await PlaceSeeder.SeedPlacesAsync(db, resolvedPath);
+    }
+    else
+    {
+        Console.WriteLine($"[PlaceSeeder] Datasets folder not found at: {resolvedPath}");
+    }
 }
 
 // ── Middleware Pipeline ──

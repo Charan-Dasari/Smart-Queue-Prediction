@@ -32,7 +32,7 @@ public class AuthService
 
         return new AuthResponse
         {
-            Token = GenerateToken(user),
+            Token = GenerateToken(user, request.IsWeb),
             User = MapToDto(user)
         };
     }
@@ -55,9 +55,10 @@ public class AuthService
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
+        // Default to false for register, or you can add IsWeb to RegisterRequest if needed
         return new AuthResponse
         {
-            Token = GenerateToken(user),
+            Token = GenerateToken(user, false), 
             User = MapToDto(user)
         };
     }
@@ -120,7 +121,7 @@ public class AuthService
         return true;
     }
 
-    private string GenerateToken(User user)
+    private string GenerateToken(User user, bool isWeb)
     {
         var jwtConfig = _config.GetSection("Jwt");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig["Key"]!));
@@ -135,11 +136,15 @@ public class AuthService
             new Claim("ProviderId", user.ProviderId?.ToString() ?? ""),
         };
 
+        var expiration = isWeb 
+            ? DateTime.UtcNow.AddMinutes(30) 
+            : DateTime.UtcNow.AddYears(1);
+
         var token = new JwtSecurityToken(
             issuer: jwtConfig["Issuer"],
             audience: jwtConfig["Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtConfig["ExpiresInMinutes"]!)),
+            expires: expiration,
             signingCredentials: credentials
         );
 

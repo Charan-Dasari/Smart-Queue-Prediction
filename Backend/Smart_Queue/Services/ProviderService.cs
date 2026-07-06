@@ -17,24 +17,45 @@ public class ProviderService
     /// </summary>
     public async Task<(ProviderDto Provider, string AdminEmail, string AdminPassword)> CreateProviderAsync(CreateProviderRequest request)
     {
+        var place = await _db.Places.FirstOrDefaultAsync(p => p.Id == request.PlaceId);
+        if (place == null)
+        {
+            throw new Exception("Place not found in the dataset.");
+        }
+
+        // Check if it's already a provider
+        var existingProvider = await _db.ServiceProviders.FirstOrDefaultAsync(p => p.Id == request.PlaceId);
+        if (existingProvider != null)
+        {
+            throw new Exception("This business has already been onboarded.");
+        }
+
+        // Parse category from Place.Category string (e.g. "Hospital" -> ServiceCategory.Hospital)
+        if (!Enum.TryParse<ServiceCategory>(place.Category, true, out var serviceCategory))
+        {
+            serviceCategory = ServiceCategory.Other;
+        }
+
         var provider = new ServiceProvider
         {
-            Name = request.Name,
-            Category = request.Category,
-            Address = request.Address,
-            Rating = 5.0,
+            Id = place.Id, // Exact same ID as Place!
+            Name = place.Name,
+            Category = serviceCategory,
+            Address = $"{place.City}, {place.State}",
+            Rating = place.Rating,
             IsActive = true,
         };
 
         _db.ServiceProviders.Add(provider);
 
         // Auto-generate admin
-        var adminEmail = $"{request.Name.ToLower().Replace(" ", "")}admin@intelliq.com";
-        var adminPassword = "admin123";
+        var sanitizedName = new string(place.Name.Where(c => char.IsLetterOrDigit(c)).ToArray()).ToLower();
+        var adminEmail = $"{sanitizedName}admin@intelliq.com";
+        var adminPassword = $"{sanitizedName}@123";
 
         var adminUser = new User
         {
-            Name = $"{request.Name} Admin",
+            Name = $"{place.Name} Admin",
             Email = adminEmail,
             Mobile = "+91 99900 00000",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
