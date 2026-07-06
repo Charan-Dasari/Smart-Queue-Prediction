@@ -16,8 +16,6 @@ IntelliQ is a full-stack, intelligent queue management and prediction platform t
 ### For Staff & Providers
 * **Live Counter Management:** Instantly update the current active token and seamlessly transition between customers.
 * **Activity & Customer Logging:** Detailed logs of completed, paused, or resumed queues to monitor provider performance.
-* **Provider Claiming System:** Unregistered businesses can "claim" a point-of-interest found on the map to officially verify and manage their queue on the platform.
-
 ---
 
 ## 🛠️ Technology Stack
