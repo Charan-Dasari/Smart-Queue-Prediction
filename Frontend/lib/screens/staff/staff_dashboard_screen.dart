@@ -146,8 +146,8 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     final assignedCounter = _dashboardData?['assignedCounter'];
     if (assignedCounter == null) return;
 
-    final currentStatus = assignedCounter['status']; // 1 = Active, 2 = Offline, 3 = Break
-    final newStatus = currentStatus == 1 ? 3 : 1; // Toggle Active and Break
+    final statusStr = assignedCounter['status']?.toString().toLowerCase() ?? 'offline';
+    final newStatus = statusStr == 'active' ? 1 : 0; // Toggle between OnBreak (1) and Active (0)
     
     try {
       await ApiService.updateCounterStatus(assignedCounter['id'], newStatus);
@@ -196,9 +196,9 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       );
     }
 
-    final counterStatusInt = data['assignedCounter']?['status'] ?? 2;
-    Color statusColor = counterStatusInt == 1 ? AppTheme.successColor : AppTheme.warningColor;
-    String statusLabel = counterStatusInt == 1 ? 'Active' : counterStatusInt == 3 ? 'On Break' : 'Offline';
+    final String counterStatusStr = data['assignedCounter']?['status']?.toString().toLowerCase() ?? 'offline';
+    Color statusColor = counterStatusStr == 'active' ? AppTheme.successColor : AppTheme.warningColor;
+    String statusLabel = counterStatusStr == 'active' ? 'Active' : counterStatusStr == 'onbreak' ? 'On Break' : 'Offline';
 
     final servingToken = data['currentlyServing'];
 
@@ -274,20 +274,23 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                     ),
                   ),
                   // Status Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
+                  InkWell(
+                    onTap: data['assignedCounter'] != null ? _togglePauseResume : null,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: counterStatusInt == 1
+                            color: counterStatusStr == 'active'
                                 ? Colors.white
                                 : Colors.amberAccent,
                             shape: BoxShape.circle,
@@ -304,6 +307,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -400,14 +404,14 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                         child: OutlinedButton.icon(
                           onPressed: data['assignedCounter'] != null ? _togglePauseResume : null,
                           icon: Icon(
-                            counterStatusInt == 1
+                            counterStatusStr == 'active'
                                 ? Icons.pause_circle_outline
                                 : Icons.play_circle_outline,
                             size: 18,
                             color: statusColor,
                           ),
                           label: Text(
-                            counterStatusInt == 1 ? 'Pause Queue' : 'Resume Queue',
+                            counterStatusStr == 'active' ? 'Pause Queue' : 'Resume Queue',
                             style: TextStyle(color: statusColor),
                           ),
                           style: OutlinedButton.styleFrom(
@@ -422,7 +426,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: counterStatusInt == 1 ? _callNext : null,
+                          onPressed: counterStatusStr == 'active' ? _callNext : null,
                           icon: const Icon(Icons.arrow_forward, size: 18),
                           label: const Text('Call Next'),
                           style: ElevatedButton.styleFrom(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/theme.dart';
 import '../../services/api_service.dart';
@@ -15,6 +16,7 @@ class SuperAdminDashboardScreen extends StatefulWidget {
 
 class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   Map<String, dynamic>? _dashboardData;
+
   bool _isLoading = true;
   String _error = '';
   Timer? _refreshTimer;
@@ -53,19 +55,15 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     super.dispose();
   }
 
-  void _registerProviderDialog() {
-    // In a real app, this would use a dedicated endpoint to create a provider and its admin user.
-    // For now, since we only have endpoints for viewing dashboard, we'll just show an informative dialog.
-    showDialog(
+  Future<void> _showOnboardingDialog() async {
+    final result = await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Provider API Not Implemented'),
-        content: const Text('The backend does not have an endpoint to onboard a new provider yet.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
-        ],
-      ),
+      builder: (context) => const ProviderOnboardingDialog(),
     );
+    
+    if (result == true) {
+      _fetchDashboard();
+    }
   }
 
   @override
@@ -147,7 +145,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: _registerProviderDialog,
+                onPressed: _showOnboardingDialog,
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Add New Service Provider & Admins', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
@@ -191,6 +189,40 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleDeleteProvider(String providerId, String providerName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Provider'),
+        content: Text('Are you sure you want to completely remove $providerName and their Admin user?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        setState(() => _isLoading = true);
+        await ApiService.deleteProvider(providerId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Provider removed.'), backgroundColor: AppTheme.successColor));
+          _fetchDashboard();
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppTheme.errorColor));
+        }
+      }
+    }
   }
 
   Widget _buildClientTile(Map<String, dynamic> p) {
@@ -252,8 +284,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(p['name'] ?? 'Unknown', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textDarkColor)),
+                const SizedBox(height: 4),
+                SelectableText('Email: $adminEmail', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
                 const SizedBox(height: 2),
-                Text('Admin: $adminEmail', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
+                SelectableText('Password: ${(p['name'] ?? '').toString().trim().toLowerCase().replaceAll(' ', '').replaceAll('-', '')}@2024', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
               ],
             ),
           ),
@@ -268,16 +302,159 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: badgeColor),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppTheme.errorColor, size: 20),
+            icon: const Icon(Icons.copy, color: AppTheme.primaryColor, size: 20),
+            tooltip: 'Copy Credentials',
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Delete not implemented in API'), behavior: SnackBarBehavior.floating),
-              );
+              final pwd = '${(p['name'] ?? '').toString().trim().toLowerCase().replaceAll(' ', '').replaceAll('-', '')}@2024';
+              Clipboard.setData(ClipboardData(text: 'Email: $adminEmail\nPassword: $pwd'));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Credentials copied to clipboard')));
             },
           ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppTheme.errorColor, size: 20),
+            onPressed: () => _handleDeleteProvider(p['id'], p['name']),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class ProviderOnboardingDialog extends StatefulWidget {
+  const ProviderOnboardingDialog({super.key});
+
+  @override
+  State<ProviderOnboardingDialog> createState() => _ProviderOnboardingDialogState();
+}
+
+class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> _places = [];
+  bool _isLoading = false;
+  String _error = '';
+
+  Future<void> _searchPlaces(String query) async {
+    if (query.isEmpty) {
+      setState(() { _places = []; _error = ''; });
+      return;
+    }
+
+    setState(() { _isLoading = true; _error = ''; });
+    try {
+      final data = await ApiService.getPlaces(query: query, pageSize: 10);
+      if (mounted) {
+        setState(() {
+          _places = data['places'] ?? [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to search places';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _onboardPlace(Map<String, dynamic> place) async {
+    try {
+      final result = await ApiService.createProvider(place['id'].toString());
+      if (mounted) {
+        final creds = result['credentials'];
+        Navigator.pop(context, true);
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Access Granted!', style: TextStyle(color: AppTheme.successColor)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${place['name']} has been onboarded.'),
+                const SizedBox(height: 16),
+                const Text('Share these credentials with the Org Admin:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                SelectableText('Email: ${creds['email']}'),
+                SelectableText('Password: ${creds['password']}'),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Done')),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppTheme.errorColor)
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        width: 600,
+        height: 600,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Onboard a Business', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+              ],
+            ),
+            const Text('Search the dataset to give access to an organization.', style: TextStyle(color: AppTheme.textMutedColor)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by name or city...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onSubmitted: _searchPlaces,
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error.isNotEmpty
+                      ? Center(child: Text(_error, style: const TextStyle(color: AppTheme.errorColor)))
+                      : _places.isEmpty
+                          ? const Center(child: Text('No results. Type and press Enter.', style: TextStyle(color: AppTheme.textMutedColor)))
+                          : ListView.separated(
+                              itemCount: _places.length,
+                              separatorBuilder: (_, __) => const Divider(),
+                              itemBuilder: (context, index) {
+                                final p = _places[index];
+                                return ListTile(
+                                  title: Text(p['name']),
+                                  subtitle: Text('${p['category']} • ${p['address']}'),
+                                  trailing: ElevatedButton(
+                                    onPressed: () => _onboardPlace(p),
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.successColor),
+                                    child: const Text('Give Access'),
+                                  ),
+                                );
+                              },
+                            ),
+            ),
+          ],
+        ),
       ),
     );
   }

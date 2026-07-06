@@ -18,6 +18,7 @@ import '../screens/user/appointment_history_screen.dart';
 import '../screens/user/profile_screen.dart';
 import '../screens/user/help_support_screen.dart';
 import '../screens/user/about_screen.dart';
+import '../screens/user/my_tokens_screen.dart';
 
 // Admin screens
 import '../screens/admin/admin_dashboard_screen.dart';
@@ -27,7 +28,6 @@ import '../screens/admin/service_management_screen.dart';
 import '../screens/admin/staff_counter_screen.dart';
 import '../screens/admin/analytics_dashboard_screen.dart';
 import '../screens/admin/ai_prediction_screen.dart';
-import '../screens/admin/role_management_screen.dart';
 
 // Staff screens
 import '../screens/staff/staff_dashboard_screen.dart';
@@ -61,8 +61,31 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const UserThemeWrapper(child: HomeDashboardScreen()),
     ),
     GoRoute(
+      path: '/my-tokens',
+      builder: (context, state) => const UserThemeWrapper(child: MyTokensScreen()),
+    ),
+    GoRoute(
       path: '/services',
-      builder: (context, state) => const UserThemeWrapper(child: ServiceSelectionScreen()),
+      builder: (context, state) {
+        final category = state.uri.queryParameters['category'];
+        return UserThemeWrapper(child: ServiceSelectionScreen(initialCategory: category));
+      },
+    ),
+    GoRoute(
+      path: '/hospital',
+      builder: (context, state) => const UserThemeWrapper(child: ServiceSelectionScreen(initialCategory: 'Hospital')),
+    ),
+    GoRoute(
+      path: '/bank',
+      builder: (context, state) => const UserThemeWrapper(child: ServiceSelectionScreen(initialCategory: 'Bank')),
+    ),
+    GoRoute(
+      path: '/restaurant',
+      builder: (context, state) => const UserThemeWrapper(child: ServiceSelectionScreen(initialCategory: 'Restaurant')),
+    ),
+    GoRoute(
+      path: '/college',
+      builder: (context, state) => const UserThemeWrapper(child: ServiceSelectionScreen(initialCategory: 'College')),
     ),
     GoRoute(
       path: '/booking/:providerId',
@@ -149,10 +172,7 @@ final GoRouter appRouter = GoRouter(
       path: '/admin/predictions',
       builder: (context, state) => const AIPredictionScreen(),
     ),
-    GoRoute(
-      path: '/admin/roles',
-      builder: (context, state) => const RoleManagementScreen(),
-    ),
+
 
     // ─── Staff Routes ────────────────────────────────────────────────────────
     GoRoute(

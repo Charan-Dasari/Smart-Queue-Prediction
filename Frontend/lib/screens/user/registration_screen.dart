@@ -201,7 +201,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         });
                       },
                       initialSelection: 'IN',
-                      favorite: const ['+91', 'IN', '+1', 'US'],
+                      countryFilter: const ['IN'],
                       showCountryOnly: false,
                       showOnlyCountryWhenClosed: false,
                       alignLeft: false,
@@ -234,6 +234,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _handleRegister(),
                 decoration: InputDecoration(
                   hintText: 'Create a strong password',
                   hintStyle: const TextStyle(color: AppTheme.textLightColor),

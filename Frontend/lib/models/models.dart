@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-enum ServiceCategory { hospital, bank, governmentOffice, college, other }
+enum ServiceCategory { hospital, bank, governmentOffice, college, restaurant, hotel, other }
 enum AppointmentStatus { upcoming, inQueue, serving, completed, cancelled }
 enum NotificationType { booking, queue, reminder, system, ai }
 enum CounterStatus { active, onBreak, offline }
@@ -272,16 +272,20 @@ class AppNotification {
 }
 
 class ServiceCounter {
+  final String id;
   final int number;
   final String staffName;
+  final String serviceName;
   final String? activeTokenNumber;
   final CounterStatus status;
   final int todayCustomers;
   final int avgServiceMinutes;
 
   const ServiceCounter({
+    required this.id,
     required this.number,
     required this.staffName,
+    required this.serviceName,
     this.activeTokenNumber,
     this.status = CounterStatus.active,
     this.todayCustomers = 0,
@@ -290,8 +294,10 @@ class ServiceCounter {
 
   factory ServiceCounter.fromJson(Map<String, dynamic> json) {
     return ServiceCounter(
+      id: json['id'] ?? '',
       number: json['number'] ?? 0,
       staffName: json['staffName'] ?? '',
+      serviceName: json['serviceName'] ?? 'General',
       activeTokenNumber: json['activeTokenNumber'],
       status: CounterStatus.values.firstWhere(
           (e) => e.name.toLowerCase() == (json['status'] ?? 'active').toString().toLowerCase(),

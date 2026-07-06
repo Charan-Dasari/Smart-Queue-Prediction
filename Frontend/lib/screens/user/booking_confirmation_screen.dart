@@ -3,6 +3,10 @@ import 'package:go_router/go_router.dart';
 import '../../utils/theme.dart';
 import '../../services/api_service.dart';
 import '../../models/models.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_provider.dart';
 
 class BookingConfirmationScreen extends StatefulWidget {
   final String appointmentId;
@@ -45,7 +49,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
       final data = await ApiService.getQueueTracking(widget.appointmentId);
       if (mounted) {
         setState(() {
-          _token = QueueToken.fromJson(data['queueToken']);
+          _token = QueueToken.fromJson(data);
           _isLoading = false;
         });
       }
@@ -193,7 +197,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
               ),
               const SizedBox(height: 24),
 
-              // ── QR Code (Placeholder Pattern) ──
+              // ── QR Code ──
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -209,17 +213,34 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textDarkColor),
                     ),
                     const SizedBox(height: 16),
-                    // QR-like pattern placeholder
+                    // Generated QR Code
                     Container(
-                      width: 160,
-                      height: 160,
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: AppTheme.borderColor, width: 2),
                       ),
-                      child: CustomPaint(
-                        painter: _QRPlaceholderPainter(),
+                      child: Builder(
+                        builder: (context) {
+                          final user = Provider.of<AuthProvider>(context, listen: false).user;
+                          final qrData = '''
+Name: ${user?.name ?? 'User'}
+Email: ${user?.email ?? 'N/A'}
+Booked Date: ${DateFormat('MMM dd, yyyy - hh:mm a').format(_token!.createdAt)}
+Service Type: ${_token!.serviceName}
+Provider: ${_token!.providerName}
+Status: ${_token!.status.name.toUpperCase()}
+Token ID: ${_token!.id}
+'''.trim();
+                          
+                          return QrImageView(
+                            data: qrData,
+                            version: QrVersions.auto,
+                            size: 160.0,
+                            backgroundColor: Colors.white,
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -237,7 +258,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton.icon(
-                  onPressed: () => context.push('/token/${_token!.id}'),
+                  onPressed: () => context.push('/my-tokens'), // Redirects to My Tokens section
                   icon: const Icon(Icons.confirmation_number_outlined, size: 20),
                   label: const Text('View Digital Token', style: TextStyle(fontSize: 15)),
                 ),
@@ -279,41 +300,4 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
       ],
     );
   }
-}
-
-class _QRPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = AppTheme.primaryColor;
-    final cellSize = size.width / 12;
-    // Create a QR-like pattern
-    final pattern = [
-      [1,1,1,1,1,1,0,1,0,1,1,1],
-      [1,0,0,0,0,1,0,0,1,0,0,1],
-      [1,0,1,1,0,1,0,1,0,1,0,1],
-      [1,0,1,1,0,1,0,0,1,1,0,1],
-      [1,0,0,0,0,1,0,1,0,0,0,1],
-      [1,1,1,1,1,1,0,1,0,1,0,1],
-      [0,0,0,0,0,0,0,0,1,0,1,0],
-      [1,0,1,0,1,0,0,1,0,1,0,1],
-      [0,1,0,1,0,1,0,0,1,0,1,0],
-      [1,0,1,1,0,0,0,1,0,1,1,1],
-      [1,1,0,0,1,1,0,0,1,0,0,0],
-      [1,1,1,1,1,1,0,1,0,1,0,1],
-    ];
-
-    for (int row = 0; row < pattern.length; row++) {
-      for (int col = 0; col < pattern[row].length; col++) {
-        if (pattern[row][col] == 1) {
-          canvas.drawRect(
-            Rect.fromLTWH(col * cellSize + 8, row * cellSize + 8, cellSize - 1, cellSize - 1),
-            paint,
-          );
-        }
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

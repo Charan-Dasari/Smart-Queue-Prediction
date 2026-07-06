@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/theme.dart';
 import '../../services/api_service.dart';
-import '../../models/models.dart';
 
 class ServiceSelectionScreen extends StatefulWidget {
-  const ServiceSelectionScreen({super.key});
+  final String? initialCategory;
+  const ServiceSelectionScreen({super.key, this.initialCategory});
 
   @override
   State<ServiceSelectionScreen> createState() => _ServiceSelectionScreenState();
@@ -13,82 +13,147 @@ class ServiceSelectionScreen extends StatefulWidget {
 
 class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'All';
-  List<ServiceProviderInfo> _providers = [];
+  String _selectedCategory = 'All';
+  String? _selectedState;
+  String? _selectedCity;
+
+  List<dynamic> _places = [];
+  List<String> _states = [];
+  List<String> _cities = [];
+  int _totalCount = 0;
+  int _currentPage = 1;
+  final int _pageSize = 50;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
   String _error = '';
 
-  final List<String> _filters = [
-    'All',
-    'Rating',
-    'Distance',
-    'Waiting Time',
-    'AI Recommended'
+  final ScrollController _scrollController = ScrollController();
+
+  // Category definitions for the "Other" (All) view
+  static final List<Map<String, dynamic>> _categoryOptions = [
+    {'label': 'Hospitals', 'route': '/hospital', 'icon': Icons.local_hospital, 'color': AppTheme.hospitalColor},
+    {'label': 'Banks', 'route': '/bank', 'icon': Icons.account_balance, 'color': AppTheme.bankColor},
+    {'label': 'Restaurants', 'route': '/restaurant', 'icon': Icons.restaurant, 'color': Colors.orange},
+    {'label': 'Colleges', 'route': '/college', 'icon': Icons.school, 'color': AppTheme.collegeColor},
   ];
 
   @override
   void initState() {
     super.initState();
-    _fetchProviders();
+    if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+      _selectedCategory = widget.initialCategory!;
+    }
+    _scrollController.addListener(_onScroll);
+    _fetchStates();
+    _fetchPlaces();
   }
 
-  Future<void> _fetchProviders() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMorePlaces();
+    }
+  }
+
+  Future<void> _fetchStates() async {
     try {
-      final data = await ApiService.getProviders();
+      final states = await ApiService.getPlaceStates();
       if (mounted) {
         setState(() {
-          _providers = data.map((e) => ServiceProviderInfo.fromJson(e)).toList();
+          _states = ['All', ...states];
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching states: $e');
+    }
+  }
+
+  Future<void> _fetchCities() async {
+    if (_selectedState == null) return;
+    try {
+      final cities = await ApiService.getPlaceCities(state: _selectedState!);
+      if (mounted) {
+        setState(() {
+          _cities = List<String>.from(cities);
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchPlaces({bool reset = true}) async {
+    if (reset) {
+      setState(() {
+        _isLoading = true;
+        _currentPage = 1;
+        _places = [];
+        _error = '';
+      });
+    }
+
+    try {
+      final category = _selectedCategory != 'All' ? _selectedCategory : null;
+      final query = _searchController.text.isNotEmpty ? _searchController.text : null;
+
+      final data = await ApiService.getPlaces(
+        category: category,
+        state: _selectedState,
+        city: _selectedCity,
+        query: query,
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
+
+      if (mounted) {
+        setState(() {
+          if (reset) {
+            _places = data['places'] ?? [];
+          } else {
+            _places.addAll(data['places'] ?? []);
+          }
+          _totalCount = data['totalCount'] ?? 0;
           _isLoading = false;
+          _isLoadingMore = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Failed to load providers';
+          _error = 'Failed to load places: $e';
           _isLoading = false;
+          _isLoadingMore = false;
         });
       }
     }
   }
 
+  Future<void> _loadMorePlaces() async {
+    if (_isLoadingMore) return;
+    if (_places.length >= _totalCount) return;
+
+    setState(() {
+      _isLoadingMore = true;
+      _currentPage++;
+    });
+
+    await _fetchPlaces(reset: false);
+  }
+
+  String _getScreenTitle() {
+    if (_selectedCategory == 'All') return 'All Services';
+    if (_selectedCategory == 'GovtOffice') return 'Government Offices';
+    return '${_selectedCategory}s';
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Select Service')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-    
-    if (_error.isNotEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Select Service')),
-        body: Center(child: Text(_error)),
-      );
-    }
-
-    // Dynamically filter providers based on search query
-    final query = _searchController.text.toLowerCase();
-    var filteredProviders = _providers.where((p) {
-      final matchesQuery = p.name.toLowerCase().contains(query) ||
-          p.category.name.toLowerCase().contains(query) ||
-          p.address.toLowerCase().contains(query);
-      return matchesQuery;
-    }).toList();
-
-    // Sort providers based on filters
-    if (_selectedFilter == 'Rating') {
-      filteredProviders.sort((a, b) => b.rating.compareTo(a.rating));
-    } else if (_selectedFilter == 'Distance') {
-      filteredProviders.sort((a, b) => a.address.compareTo(b.address)); // Lexical fallback
-    } else if (_selectedFilter == 'Waiting Time') {
-      filteredProviders.sort((a, b) => a.estimatedWaitMinutes.compareTo(b.estimatedWaitMinutes));
-    }
-
-    final collegeCount = _providers.where((p) => p.category == ServiceCategory.college).length;
-    final bankCount = _providers.where((p) => p.category == ServiceCategory.bank).length;
-    final hospitalCount = _providers.where((p) => p.category == ServiceCategory.hospital).length;
-    final govtCount = _providers.where((p) => p.category == ServiceCategory.governmentOffice).length;
+    // If category is "All", show category selection tiles first
+    final bool showCategoryPicker = _selectedCategory == 'All';
 
     return Scaffold(
       appBar: AppBar(
@@ -96,155 +161,50 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Select Service'),
+        title: Text(_getScreenTitle()),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Search Bar ──
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.borderColor),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  hintText: 'Search services or providers...',
-                  prefixIcon: Icon(Icons.search, color: AppTheme.textMutedColor, size: 20),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-              ),
+      body: showCategoryPicker
+          ? _buildCategoryPickerView(context)
+          : _buildPlacesListView(context),
+    );
+  }
+
+  /// View shown when user taps "Other" — displays all service categories to choose from.
+  Widget _buildCategoryPickerView(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Select a Service Type',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.primaryColor,
             ),
-            const SizedBox(height: 14),
-
-            // ── Filter Chips ──
-            SizedBox(
-              height: 36,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _filters.length,
-                itemBuilder: (context, index) {
-                  final filter = _filters[index];
-                  final isActive = _selectedFilter == filter;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedFilter = filter;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isActive ? AppTheme.primaryColor : Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isActive ? AppTheme.primaryColor : AppTheme.borderColor,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (filter == 'AI Recommended') ...[
-                            Icon(Icons.auto_awesome, size: 12, color: isActive ? Colors.white : AppTheme.aiAccent),
-                            const SizedBox(width: 4),
-                          ],
-                          Text(
-                            filter,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isActive ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // ── Category List ──
-            const Text(
-              'Categories',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            _buildCategoryCard(context, icon: Icons.local_hospital, title: 'Hospital', subtitle: '$hospitalCount providers nearby', color: AppTheme.hospitalColor, providerId: _providers.firstWhere((p) => p.category == ServiceCategory.hospital, orElse: () => _providers.first).id),
-            _buildCategoryCard(context, icon: Icons.account_balance, title: 'Bank', subtitle: '$bankCount branches nearby', color: AppTheme.bankColor, providerId: _providers.firstWhere((p) => p.category == ServiceCategory.bank, orElse: () => _providers.first).id),
-            _buildCategoryCard(context, icon: Icons.account_balance_outlined, title: 'Government Office', subtitle: '$govtCount offices nearby', color: AppTheme.govtColor, providerId: _providers.firstWhere((p) => p.category == ServiceCategory.governmentOffice, orElse: () => _providers.first).id),
-            if (collegeCount > 0)
-              _buildCategoryCard(context, icon: Icons.school_outlined, title: 'College', subtitle: '$collegeCount institutions nearby', color: AppTheme.collegeColor, providerId: _providers.firstWhere((p) => p.category == ServiceCategory.college).id),
-            const SizedBox(height: 28),
-
-            // ── Popular Providers ──
-            const Text(
-              'Popular Near You',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            ...filteredProviders.map((p) {
-              Color waitColor = AppTheme.queueLow;
-              String crowdLabel = 'Low';
-              if (p.activeQueueCount > 8) {
-                waitColor = AppTheme.queueHigh;
-                crowdLabel = 'High';
-              } else if (p.activeQueueCount > 4) {
-                waitColor = AppTheme.queueMedium;
-                crowdLabel = 'Medium';
-              }
-              return _buildProviderCard(
-                context,
-                name: p.name,
-                category: p.category.name.toUpperCase(),
-                rating: p.rating,
-                distance: p.address,
-                waitTime: '${p.estimatedWaitMinutes} min',
-                waitColor: waitColor,
-                crowdLabel: crowdLabel,
-                crowdColor: waitColor,
-                queueCount: p.activeQueueCount,
-                providerId: p.id,
-              );
-            }),
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Choose from the available services below',
+            style: TextStyle(fontSize: 14, color: AppTheme.textMutedColor),
+          ),
+          const SizedBox(height: 24),
+          ..._categoryOptions.map((cat) => _buildCategoryTile(
+            context,
+            icon: cat['icon'] as IconData,
+            title: cat['label'] as String,
+            color: cat['color'] as Color,
+            route: cat['route'] as String,
+          )),
+        ],
       ),
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color color, required String providerId}) {
+  Widget _buildCategoryTile(BuildContext context, {required IconData icon, required String title, required Color color, required String route}) {
     return GestureDetector(
-      onTap: () => context.push('/booking/$providerId'),
+      onTap: () => context.push(route),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -256,35 +216,253 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor)),
-                ],
-              ),
+              child: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textLightColor),
+            Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textLightColor),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProviderCard(BuildContext context, {required String name, required String category, required double rating, required String distance, required String waitTime, required Color waitColor, required String crowdLabel, required Color crowdColor, required int queueCount, required String providerId}) {
+  /// View shown when a specific category is selected — displays places from the dataset.
+  Widget _buildPlacesListView(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error.isNotEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: AppTheme.errorColor),
+              const SizedBox(height: 12),
+              Text(_error, textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.textMutedColor)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: () => _fetchPlaces(), child: const Text('Retry')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // ── Search & Filters ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: Column(
+            children: [
+              // Search Bar
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onSubmitted: (_) => _fetchPlaces(),
+                  decoration: InputDecoration(
+                    hintText: 'Search by name, city, or state...',
+                    hintStyle: TextStyle(color: AppTheme.textMutedColor.withOpacity(0.5)),
+                    prefixIcon: const Icon(Icons.search, color: AppTheme.textMutedColor, size: 20),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              _fetchPlaces();
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // State & City Filters
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDropdown(
+                      hint: 'State',
+                      value: _selectedState,
+                      items: _states,
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedState = val;
+                          _selectedCity = null;
+                          _cities = [];
+                        });
+                        if (val != null) _fetchCities();
+                        _fetchPlaces();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildDropdown(
+                      hint: 'City',
+                      value: _selectedCity,
+                      items: _cities,
+                      onChanged: (val) {
+                        setState(() => _selectedCity = val);
+                        _fetchPlaces();
+                      },
+                    ),
+                  ),
+                  if (_selectedState != null || _selectedCity != null)
+                    IconButton(
+                      icon: const Icon(Icons.clear, size: 20, color: AppTheme.textMutedColor),
+                      onPressed: () {
+                        setState(() {
+                          _selectedState = null;
+                          _selectedCity = null;
+                          _cities = [];
+                        });
+                        _fetchPlaces();
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Results count
+              if (_searchController.text.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '$_totalCount results found',
+                    style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor, fontWeight: FontWeight.w500),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // ── Places List ──
+        Expanded(
+          child: _places.isEmpty
+              ? const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off, size: 48, color: AppTheme.textLightColor),
+                      SizedBox(height: 12),
+                      Text('No places found', style: TextStyle(color: AppTheme.textMutedColor, fontSize: 16)),
+                      SizedBox(height: 4),
+                      Text('Try adjusting your filters', style: TextStyle(color: AppTheme.textLightColor, fontSize: 13)),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: _places.length + (_isLoadingMore ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == _places.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      );
+                    }
+                    final place = _places[index];
+                    return _buildPlaceCard(context, place);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdown({required String hint, required String? value, required List<String> items, required ValueChanged<String?> onChanged}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          hint: Text(hint, style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor)),
+          value: value,
+          items: items.map((item) => DropdownMenuItem(value: item, child: Text(item, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis))).toList(),
+          onChanged: onChanged,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 18, color: AppTheme.textMutedColor),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceCard(BuildContext context, dynamic place) {
+    final name = place['name'] ?? '';
+    final category = place['category'] ?? '';
+    final state = place['state'] ?? '';
+    final city = place['city'] ?? '';
+    final address = place['address'] ?? '';
+    final rating = (place['rating'] ?? 0.0).toDouble();
+    final placeId = place['id'] ?? '';
+
+    Color categoryColor = AppTheme.primaryColor;
+    IconData categoryIcon = Icons.place;
+
+    switch (category) {
+      case 'Hospital':
+        categoryColor = AppTheme.hospitalColor;
+        categoryIcon = Icons.local_hospital;
+        break;
+      case 'Bank':
+        categoryColor = AppTheme.bankColor;
+        categoryIcon = Icons.account_balance;
+        break;
+      case 'Restaurant':
+        categoryColor = Colors.orange;
+        categoryIcon = Icons.restaurant;
+        break;
+      case 'College':
+        categoryColor = AppTheme.collegeColor;
+        categoryIcon = Icons.school;
+        break;
+      case 'GovtOffice':
+        categoryColor = AppTheme.govtColor;
+        categoryIcon = Icons.account_balance_outlined;
+        break;
+      case 'Hotel':
+        categoryColor = Colors.indigo;
+        categoryIcon = Icons.hotel;
+        break;
+    }
+
+    final locationParts = [city, state].where((s) => s.isNotEmpty).toList();
+    final location = locationParts.join(', ');
+
     return GestureDetector(
-      onTap: () => context.push('/booking/$providerId'),
+      onTap: () => context.push('/booking/$placeId'),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -298,58 +476,57 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
           children: [
             Row(
               children: [
-                Expanded(
-                  child: Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: waitColor.withOpacity(0.1),
+                    color: categoryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Icon(categoryIcon, color: categoryColor, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Text(
-                    category,
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: waitColor),
+                    name,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(Icons.star, color: Colors.amber, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  rating.toString(),
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(width: 12),
+                if (rating > 0) ...[
+                  const Icon(Icons.star, color: Colors.amber, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    rating.toStringAsFixed(1),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: 12),
+                ],
                 const Icon(Icons.location_on_outlined, color: AppTheme.textMutedColor, size: 16),
                 const SizedBox(width: 4),
-                Text(
-                  distance,
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor),
+                Expanded(
+                  child: Text(
+                    location,
+                    style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
-            const Divider(height: 24, color: AppTheme.borderColor),
-            Row(
-              children: [
-                Icon(Icons.access_time, color: waitColor, size: 16),
-                const SizedBox(width: 6),
-                Text(
-                  'Wait: $waitTime',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: waitColor),
-                ),
-                const Spacer(),
-                Icon(Icons.people_outline, color: crowdColor, size: 16),
-                const SizedBox(width: 6),
-                Text(
-                  '$crowdLabel Crowd ($queueCount in queue)',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: crowdColor),
-                ),
-              ],
-            ),
+            if (address.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                address,
+                style: const TextStyle(fontSize: 12, color: AppTheme.textLightColor),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ],
         ),
       ),

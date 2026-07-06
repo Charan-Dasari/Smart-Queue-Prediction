@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../utils/theme.dart';
 import '../../models/models.dart';
 import '../../services/auth_provider.dart';
+import '../../services/api_service.dart';
 import 'package:provider/provider.dart';
 
 class ServiceManagementScreen extends StatefulWidget {
@@ -13,42 +14,36 @@ class ServiceManagementScreen extends StatefulWidget {
 }
 
 class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
-  final List<Map<String, dynamic>> _services = [];
-  bool _isInitialized = false;
+  List<dynamic> _services = [];
+  bool _isLoading = true;
+  String _error = '';
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      final user = Provider.of<AuthProvider>(context, listen: false).user;
-      final providerId = user?.providerId ?? 'h1';
+  void initState() {
+    super.initState();
+    _fetchServices();
+  }
 
-      // Populate initial service templates based on admin provider category
-      if (providerId == 'b1') {
-        _services.addAll([
-          {'name': 'Cash Deposit', 'desc': 'Deposit physical currency', 'duration': '8 min', 'cost': '₹0', 'active': true},
-          {'name': 'Account Opening', 'desc': 'Open savings/current accounts', 'duration': '20 min', 'cost': '₹100', 'active': true},
-          {'name': 'Loan Query', 'desc': 'Consultation on housing/personal loans', 'duration': '30 min', 'cost': '₹0', 'active': true},
-          {'name': 'Card Issue', 'desc': 'Collect or replace debit/credit cards', 'duration': '10 min', 'cost': '₹150', 'active': false},
-        ]);
-      } else if (providerId == 'g1') {
-        _services.addAll([
-          {'name': 'Document Verification', 'desc': 'Verify government records & identity', 'duration': '15 min', 'cost': '₹50', 'active': true},
-          {'name': 'License Renewal', 'desc': 'Driving or professional license renewal', 'duration': '25 min', 'cost': '₹250', 'active': true},
-          {'name': 'Govt Grant Inquiry', 'desc': 'Apply for or query welfare schemes', 'duration': '20 min', 'cost': '₹0', 'active': true},
-          {'name': 'Certificate Issue', 'desc': 'Birth/Marriage/Income certificates', 'duration': '12 min', 'cost': '₹30', 'active': false},
-        ]);
-      } else {
-        // Default Hospital
-        _services.addAll([
-          {'name': 'General Consultation', 'desc': 'Basic medical checkup & advice', 'duration': '15 min', 'cost': '₹200', 'active': true},
-          {'name': 'Specialist Checkup', 'desc': 'Specialized medical examination', 'duration': '30 min', 'cost': '₹500', 'active': true},
-          {'name': 'Lab Test', 'desc': 'Blood work & diagnostic tests', 'duration': '20 min', 'cost': '₹350', 'active': true},
-          {'name': 'Follow-up Visit', 'desc': 'Post-treatment follow-up', 'duration': '10 min', 'cost': '₹100', 'active': true},
-          {'name': 'Dental Checkup', 'desc': 'Dental examination & cleaning', 'duration': '25 min', 'cost': '₹400', 'active': false},
-        ]);
+  Future<void> _fetchServices() async {
+    try {
+      final user = Provider.of<AuthProvider>(context, listen: false).user;
+      final providerId = user?.providerId ?? '';
+      if (providerId.isEmpty) return;
+
+      final data = await ApiService.getProviderServices(providerId);
+      if (mounted) {
+        setState(() {
+          _services = data;
+          _isLoading = false;
+        });
       }
-      _isInitialized = true;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load services';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -71,20 +66,20 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
               const SizedBox(height: 12),
               TextField(controller: descController, decoration: const InputDecoration(hintText: 'Description', prefixIcon: Icon(Icons.description_outlined, size: 20)), maxLines: 2),
               const SizedBox(height: 12),
-              TextField(controller: durationController, decoration: const InputDecoration(hintText: 'Duration (e.g. 15 min)', prefixIcon: Icon(Icons.access_time, size: 20)), keyboardType: TextInputType.text),
+              TextField(controller: durationController, decoration: const InputDecoration(hintText: 'Duration in Minutes (e.g. 15)', prefixIcon: Icon(Icons.access_time, size: 20)), keyboardType: TextInputType.number),
               const SizedBox(height: 12),
-              TextField(controller: costController, decoration: const InputDecoration(hintText: 'Cost (e.g. ₹200)', prefixIcon: Icon(Icons.currency_rupee, size: 20)), keyboardType: TextInputType.text),
+              TextField(controller: costController, decoration: const InputDecoration(hintText: 'Cost (e.g. 200)', prefixIcon: Icon(Icons.currency_rupee, size: 20)), keyboardType: TextInputType.number),
             ],
           ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final name = nameController.text.trim();
               final desc = descController.text.trim();
-              final duration = durationController.text.trim();
-              final cost = costController.text.trim();
+              final duration = int.tryParse(durationController.text.trim()) ?? 15;
+              final cost = double.tryParse(costController.text.trim()) ?? 0.0;
 
               if (name.isEmpty || desc.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -93,19 +88,31 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
                 return;
               }
 
-              setState(() {
-                _services.add({
-                  'name': name,
-                  'desc': desc,
-                  'duration': duration.isNotEmpty ? duration : '15 min',
-                  'cost': cost.isNotEmpty ? cost : '₹0',
-                  'active': true,
-                });
-              });
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('$name service added successfully!'), backgroundColor: AppTheme.successColor, behavior: SnackBarBehavior.floating),
-              );
+              setState(() { _isLoading = true; });
+
+              try {
+                final user = Provider.of<AuthProvider>(context, listen: false).user;
+                final providerId = user?.providerId ?? '';
+                await ApiService.createService(providerId, {
+                  'name': name,
+                  'description': desc,
+                  'avgDurationMinutes': duration,
+                  'cost': cost,
+                  'isActive': true,
+                });
+                _fetchServices();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('$name service added successfully!'), backgroundColor: AppTheme.successColor, behavior: SnackBarBehavior.floating),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  setState(() { _isLoading = false; });
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add service')));
+                }
+              }
             },
             child: const Text('Add'),
           ),
@@ -131,7 +138,11 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
         ),
         title: const Text('Manage Services'),
       ),
-      body: _services.isEmpty
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error.isNotEmpty
+              ? Center(child: Text(_error))
+              : _services.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -148,7 +159,7 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final svc = _services[index];
-                final isActive = svc['active'] as bool;
+                final isActive = svc['isActive'] as bool? ?? true;
 
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -169,7 +180,7 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
                                 Row(
                                   children: [
                                     Text(
-                                      svc['name'] as String,
+                                      svc['name'] as String? ?? '',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
@@ -191,7 +202,7 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  svc['desc'] as String,
+                                  svc['description'] as String? ?? '',
                                   style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor),
                                 ),
                               ],
@@ -199,10 +210,15 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
                           ),
                           Switch(
                             value: isActive,
-                            onChanged: (val) {
-                              setState(() {
-                                svc['active'] = val;
-                              });
+                            onChanged: (val) async {
+                              try {
+                                final newStatus = await ApiService.toggleService(svc['id']);
+                                setState(() {
+                                  svc['isActive'] = newStatus;
+                                });
+                              } catch (e) {
+                                if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to toggle status')));
+                              }
                             },
                             activeColor: AppTheme.successColor,
                           ),
@@ -211,20 +227,27 @@ class _ServiceManagementScreenState extends State<ServiceManagementScreen> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          _buildInfoChip(Icons.access_time, svc['duration'] as String),
+                          _buildInfoChip(Icons.access_time, '${svc['avgDurationMinutes']} min'),
                           const SizedBox(width: 12),
-                          _buildInfoChip(Icons.currency_rupee, svc['cost'] as String),
+                          _buildInfoChip(Icons.currency_rupee, '₹${svc['cost']}'),
                           const Spacer(),
                           SizedBox(
                             height: 32,
                             child: OutlinedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _services.removeAt(index);
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Service deleted'), behavior: SnackBarBehavior.floating, backgroundColor: AppTheme.errorColor),
-                                );
+                              onPressed: () async {
+                                try {
+                                  await ApiService.deleteService(svc['id']);
+                                  setState(() {
+                                    _services.removeAt(index);
+                                  });
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Service deleted'), behavior: SnackBarBehavior.floating, backgroundColor: AppTheme.errorColor),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete')));
+                                }
                               },
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.errorColor,

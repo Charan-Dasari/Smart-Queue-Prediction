@@ -84,18 +84,11 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 48),
               // ── Header ──
-              Container(
+              Image.asset(
+                'assets/images/app_logo.png',
                 width: 56,
                 height: 56,
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.queue_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                fit: BoxFit.contain,
               ),
               const SizedBox(height: 24),
               const Text(
@@ -221,6 +214,8 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _handleLogin(),
                 decoration: InputDecoration(
                   hintText: 'Enter your password',
                   hintStyle: const TextStyle(color: AppTheme.textLightColor),

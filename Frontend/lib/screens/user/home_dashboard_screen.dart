@@ -70,6 +70,13 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       // ── Greeting Header ──
                       Row(
                         children: [
+                          Image.asset(
+                            'assets/images/app_logo.png',
+                            width: 48,
+                            height: 48,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +92,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                 Text(
                                   user?.name ?? 'User',
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                     color: Theme.of(context).textTheme.bodyLarge?.color,
                                     letterSpacing: -0.5,
@@ -325,11 +332,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         children: [
                           Expanded(child: _buildQuickAction(context, Icons.calendar_today_outlined, 'Book\nAppointment', AppTheme.primaryColor, () => context.push('/services'))),
                           const SizedBox(width: 12),
-                          Expanded(child: _buildQuickAction(context, Icons.confirmation_number_outlined, 'My\nTokens', AppTheme.accentColor, () => context.push('/token/${_activeToken?.id ?? "none"}'))),
+                          Expanded(child: _buildQuickAction(context, Icons.confirmation_number_outlined, 'My\nTokens', AppTheme.accentColor, () => context.push('/my-tokens'))),
                           const SizedBox(width: 12),
                           Expanded(child: _buildQuickAction(context, Icons.history, 'History', AppTheme.warningColor, () => context.push('/history'))),
-                          const SizedBox(width: 12),
-                          Expanded(child: _buildQuickAction(context, Icons.location_on_outlined, 'Nearby\nCenters', AppTheme.hospitalColor, () => context.push('/services'))),
                         ],
                       ),
                       const SizedBox(height: 28),
@@ -365,10 +370,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: [
-                            _buildServiceCard(context, Icons.local_hospital, 'Hospital', AppTheme.hospitalColor, () => context.push('/services')),
-                            _buildServiceCard(context, Icons.account_balance, 'Bank', AppTheme.bankColor, () => context.push('/services')),
-                            _buildServiceCard(context, Icons.account_balance_outlined, 'Govt Office', AppTheme.govtColor, () => context.push('/services')),
-                            _buildServiceCard(context, Icons.school_outlined, 'College', AppTheme.collegeColor, () => context.push('/services')),
+                            _buildServiceCard(context, Icons.local_hospital, 'Hospital', AppTheme.hospitalColor, () => context.push('/hospital')),
+                            _buildServiceCard(context, Icons.account_balance, 'Bank', AppTheme.bankColor, () => context.push('/bank')),
+                            _buildServiceCard(context, Icons.restaurant, 'Restaurant', Colors.orange, () => context.push('/restaurant')),
                             _buildServiceCard(context, Icons.more_horiz, 'Other', AppTheme.otherColor, () => context.push('/services')),
                           ],
                         ),

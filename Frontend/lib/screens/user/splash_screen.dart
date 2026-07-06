@@ -16,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _logoController;
   late AnimationController _pulseController;
+  late AnimationController _rotationController;
   late Animation<double> _logoScale;
   late Animation<double> _logoOpacity;
   late Animation<double> _pulseAnimation;
@@ -48,6 +49,11 @@ class _SplashScreenState extends State<SplashScreen>
     _pulseAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
 
     _logoController.forward();
 
@@ -86,6 +92,7 @@ class _SplashScreenState extends State<SplashScreen>
   void dispose() {
     _logoController.dispose();
     _pulseController.dispose();
+    _rotationController.dispose();
     super.dispose();
   }
 
@@ -116,22 +123,10 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.queue_rounded,
-                        size: 52,
-                        color: Colors.white,
-                      ),
+                    Image.asset(
+                      'assets/images/splash_logo.png',
+                      width: 150,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 24),
                     const Text(
@@ -169,17 +164,13 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 160,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          backgroundColor: Colors.white.withOpacity(0.15),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppTheme.accentColor,
-                          ),
-                          minHeight: 3,
-                        ),
+                    RotationTransition(
+                      turns: _rotationController,
+                      child: Image.asset(
+                        'assets/images/app_logo.png',
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.contain,
                       ),
                     ),
                     const SizedBox(height: 16),

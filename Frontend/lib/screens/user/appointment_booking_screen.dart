@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../utils/theme.dart';
 import '../../services/api_service.dart';
 import '../../models/models.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_provider.dart';
 
 class AppointmentBookingScreen extends StatefulWidget {
   final String providerId;
@@ -15,10 +17,12 @@ class AppointmentBookingScreen extends StatefulWidget {
 class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   DateTime _selectedDate = DateTime.now();
   int _selectedSlotIndex = -1;
+  int _aiRecommendedSlotIndex = -1;
   String? _selectedServiceId;
   
   ServiceProviderInfo? _provider;
   bool _isLoading = true;
+  bool _notOnboarded = false;
   String _error = '';
 
   final List<Map<String, dynamic>> _timeSlots = [
@@ -39,15 +43,37 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   @override
   void initState() {
     super.initState();
+    // Pick a random available slot for the mock AI recommendation
+    final availableIndices = [];
+    for (int i = 0; i < _timeSlots.length; i++) {
+      if (_timeSlots[i]['available'] == true) {
+        availableIndices.add(i);
+      }
+    }
+    if (availableIndices.isNotEmpty) {
+      availableIndices.shuffle();
+      _aiRecommendedSlotIndex = availableIndices.first;
+    }
+    
     _fetchProviderDetails();
   }
 
   Future<void> _fetchProviderDetails() async {
     try {
       final data = await ApiService.getProviderById(widget.providerId);
+      final countersData = await ApiService.getProviderCountersById(widget.providerId);
+      
+      final Set<String> activeServiceNames = countersData
+          .map((c) => c['serviceName'].toString().toLowerCase())
+          .toSet();
+
       if (mounted) {
         setState(() {
           _provider = ServiceProviderInfo.fromJson(data);
+          
+          // Filter out services that don't have assigned counters based on name matching
+          _provider!.services.retainWhere((s) => activeServiceNames.contains(s.name.toLowerCase()));
+
           if (_provider!.services.isNotEmpty) {
             _selectedServiceId = _provider!.services.first.id;
           }
@@ -57,7 +83,11 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Failed to load provider details';
+          if (e.toString().contains('ProviderNotOnboarded')) {
+            _notOnboarded = true;
+          } else {
+            _error = 'Failed to load provider details';
+          }
           _isLoading = false;
         });
       }
@@ -73,14 +103,27 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     }
 
     try {
+      if (_selectedSlotIndex == -1) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a time slot')),
+        );
+        return;
+      }
+
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
-      final tokenData = await ApiService.joinQueue(widget.providerId, _selectedServiceId!);
-      final token = QueueToken.fromJson(tokenData);
+      final tokenData = await ApiService.bookAppointment(
+        widget.providerId, 
+        _selectedServiceId!, 
+        null, // AI randomized dummy slot or unassigned slot
+        _selectedDate
+      );
+      
+      final token = Appointment.fromJson(tokenData);
 
       if (!mounted) return;
       context.pop(); // dismiss loading dialog
@@ -103,6 +146,45 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
       return Scaffold(
         appBar: AppBar(title: const Text('Book Appointment')),
         body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_notOnboarded) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            onPressed: () => context.pop(),
+          ),
+          title: const Text('Book Appointment'),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.store_outlined, size: 80, color: AppTheme.textMutedColor.withOpacity(0.5)),
+                const SizedBox(height: 24),
+                const Text(
+                  'Not Available on IntelliQ',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textDarkColor),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'This business hasn\'t started using this app yet. Appointments and queues cannot be managed here at the moment.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: AppTheme.textMutedColor, height: 1.5),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -292,48 +374,49 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
             const SizedBox(height: 28),
 
             // ── AI Recommended Slot ──
-            GestureDetector(
-              onTap: () => setState(() => _selectedSlotIndex = 7), // 02:00 PM index
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: AppTheme.aiGradient,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.aiAccent.withOpacity(0.2),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
+            if (_aiRecommendedSlotIndex != -1)
+              GestureDetector(
+                onTap: () => setState(() => _selectedSlotIndex = _aiRecommendedSlotIndex),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.aiGradient,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.aiAccent.withOpacity(0.2),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
-                      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 22),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'AI Recommended Slot',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '2:00 PM — Expected wait: ~8 min',
-                            style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)),
-                          ),
-                        ],
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.auto_awesome, color: Colors.white, size: 22),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'AI Recommended Slot',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${_timeSlots[_aiRecommendedSlotIndex]['time']} — Expected wait: ~${(_timeSlots[_aiRecommendedSlotIndex]['crowd'] * 20).round()} min',
+                              style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)),
+                            ),
+                          ],
                       ),
                     ),
                     Container(

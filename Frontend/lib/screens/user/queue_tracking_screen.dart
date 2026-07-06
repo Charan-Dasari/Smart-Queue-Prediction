@@ -46,13 +46,12 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen>
       final data = await ApiService.getQueueTracking(widget.tokenId);
       if (mounted) {
         setState(() {
-          _token = QueueToken.fromJson(data['queueToken']);
-          if (data['activeCounter'] != null) {
-            _activeCounter = ServiceCounter.fromJson(data['activeCounter']);
-          } else {
-            _activeCounter = null;
-          }
-          _estimatedWaitMinutes = data['estimatedWaitMinutes'] ?? _token?.estimatedWaitMinutes ?? 0;
+          // The API returns the QueueTokenDto directly
+          _token = QueueToken.fromJson(data);
+          
+          // We don't have activeCounter in the response currently, we rely on token data
+          _activeCounter = null; 
+          _estimatedWaitMinutes = _token?.estimatedWaitMinutes ?? 0;
           _isLoading = false;
         });
       }

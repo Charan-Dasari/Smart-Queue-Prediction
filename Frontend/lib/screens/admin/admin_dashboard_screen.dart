@@ -67,23 +67,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final providerName = _dashboardData!['providerName'] ?? 'Unknown Provider';
     final categoryStr = (_dashboardData!['providerCategory'] ?? 'other').toString().toLowerCase();
     
-    String dashboardTitle = 'Hospital Admin Dashboard';
-    String queueRecommendation = 'Open Counter 5 to reduce average wait time by ~40%. Current queue has ${_dashboardData!['activeQueues']} pending tokens.';
     Color categoryColor = AppTheme.hospitalColor;
-
-    if (categoryStr == 'bank' || categoryStr == '1') { // C# enum 1
-      dashboardTitle = 'Bank Admin Dashboard';
-      queueRecommendation = 'Open Counter 3 to reduce cash deposit wait times by ~25%. Today\'s customer volume is high.';
-      categoryColor = AppTheme.bankColor;
-    } else if (categoryStr == 'govtoffice' || categoryStr == '2') {
-      dashboardTitle = 'Govt Admin Dashboard';
-      queueRecommendation = 'Reallocate Counter 4 for Document Verification to clear backlog. Wait time is currently ~45 min.';
-      categoryColor = AppTheme.govtColor;
-    }
+    if (categoryStr == 'bank') categoryColor = AppTheme.bankColor;
+    else if (categoryStr == 'restaurant') categoryColor = Colors.orange;
+    else if (categoryStr == 'college') categoryColor = Colors.purple;
+    else if (categoryStr == 'govtoffice') categoryColor = AppTheme.govtColor;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(dashboardTitle),
+        title: const Text('Admin Dashboard'),
         leading: Padding(
           padding: const EdgeInsets.only(left: 16),
           child: Icon(Icons.admin_panel_settings, color: categoryColor),
@@ -154,7 +146,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           children: [
                             Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppTheme.successColor, shape: BoxShape.circle)),
                             const SizedBox(width: 4),
-                            const Text('Healthy', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.successColor)),
+                            const Text('Live', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.successColor)),
                           ],
                         ),
                       ),
@@ -164,7 +156,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
-                      value: 0.65,
+                      value: _dashboardData!['activeQueues'] > 0 ? 0.7 : 0.0,
                       backgroundColor: AppTheme.borderColor,
                       valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.successColor),
                       minHeight: 8,
@@ -174,8 +166,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('3 of 5 counters active', style: TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
-                      Text('65% capacity', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.successColor)),
+                      Text('${_dashboardData!['activeQueues']} Active Queues', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
+                      const Text('Monitoring', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.successColor)),
                     ],
                   ),
                 ],
@@ -190,75 +182,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             const SizedBox(height: 12),
             Row(
-              children: [
-                Expanded(child: _buildPerfCard('Served', '${_dashboardData!['servedToday']}', Icons.check_circle_outline, AppTheme.successColor, null)),
-                const SizedBox(width: 10),
-                Expanded(child: _buildPerfCard('In Queue', '${_dashboardData!['activeQueues']}', Icons.people_outline, AppTheme.infoColor, null)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: _buildPerfCard('Avg Wait', '${_dashboardData!['avgWaitMinutes']}m', Icons.access_time, AppTheme.warningColor, null)),
-                const SizedBox(width: 10),
-                Expanded(child: _buildPerfCard('Satisfaction', '${_dashboardData!['satisfactionScore']}', Icons.star_outline, AppTheme.accentColor, null)),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // ── AI Recommendation Card ──
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                gradient: AppTheme.aiGradient,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.aiAccent.withOpacity(0.25),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: const [
-                      Icon(Icons.auto_awesome, color: Colors.white, size: 18),
-                      const SizedBox(width: 8),
-                      Text('AI Recommendation', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    queueRecommendation,
-                    style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.85), height: 1.4),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Recommendation applied successfully for $providerName'), behavior: SnackBarBehavior.floating, backgroundColor: AppTheme.successColor),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.aiAccent,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: const Text('Apply Recommendation', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+               children: [
+                 Expanded(child: _buildPerfCard('Served', '${_dashboardData!['servedToday']}', Icons.check_circle_outline, AppTheme.successColor, null)),
+                 const SizedBox(width: 10),
+                 Expanded(child: _buildPerfCard('In Queue', '${_dashboardData!['activeQueues']}', Icons.people_outline, AppTheme.infoColor, null)),
+               ],
+             ),
+             const SizedBox(height: 10),
+             Row(
+               children: [
+                 Expanded(child: _buildPerfCard('Avg Wait', '${_dashboardData!['avgWaitMinutes']}m', Icons.access_time, AppTheme.warningColor, null)),
+                 const SizedBox(width: 10),
+                 Expanded(child: _buildPerfCard('Satisfaction', '${_dashboardData!['satisfactionScore']}', Icons.star_outline, AppTheme.accentColor, null)),
+               ],
+             ),
+             const SizedBox(height: 24),
 
             // ── Summary Cards ──
             Row(
@@ -280,7 +218,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             _buildActionTile(context, Icons.event_note, 'Appointments', 'View & manage bookings', AppTheme.successColor, '/admin/appointments'),
             _buildActionTile(context, Icons.miscellaneous_services, 'Services', 'Add/edit/delete services', AppTheme.warningColor, '/admin/services'),
             _buildActionTile(context, Icons.group, 'Staff & Counters', 'Manage counters & staff', AppTheme.accentColor, '/admin/staff'),
-            _buildActionTile(context, Icons.manage_accounts, 'Role Management', 'Assign user roles', AppTheme.aiAccent, '/admin/roles'),
             _buildActionTile(context, Icons.bar_chart, 'Analytics', 'View reports & trends', AppTheme.hospitalColor, '/admin/analytics'),
             _buildActionTile(context, Icons.auto_awesome, 'AI Predictions', 'Crowd & wait predictions', AppTheme.aiAccent, '/admin/predictions'),
             const SizedBox(height: 28),
