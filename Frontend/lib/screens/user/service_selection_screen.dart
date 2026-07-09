@@ -13,6 +13,8 @@ class ServiceSelectionScreen extends StatefulWidget {
 
 class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
   String _selectedCategory = 'All';
   String? _selectedState;
   String? _selectedCity;
@@ -52,6 +54,8 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _stateController.dispose();
+    _cityController.dispose();
     super.dispose();
   }
 
@@ -75,12 +79,12 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   }
 
   Future<void> _fetchCities() async {
-    if (_selectedState == null) return;
+    if (_selectedState == null || _selectedState == 'All') return;
     try {
       final cities = await ApiService.getPlaceCities(state: _selectedState!);
       if (mounted) {
         setState(() {
-          _cities = List<String>.from(cities);
+          _cities = ['All', ...cities];
         });
       }
     } catch (_) {}
@@ -99,11 +103,13 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
     try {
       final category = _selectedCategory != 'All' ? _selectedCategory : null;
       final query = _searchController.text.isNotEmpty ? _searchController.text : null;
+      final stateParam = (_selectedState != null && _selectedState != 'All') ? _selectedState : null;
+      final cityParam = (_selectedCity != null && _selectedCity != 'All') ? _selectedCity : null;
 
       final data = await ApiService.getPlaces(
         category: category,
-        state: _selectedState,
-        city: _selectedCity,
+        state: stateParam,
+        city: cityParam,
         query: query,
         page: _currentPage,
         pageSize: _pageSize,
@@ -307,25 +313,28 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildDropdown(
+                    child: _buildSearchableDropdown(
                       hint: 'State',
+                      controller: _stateController,
                       value: _selectedState,
                       items: _states,
                       onChanged: (val) {
                         setState(() {
                           _selectedState = val;
                           _selectedCity = null;
+                          _cityController.clear();
                           _cities = [];
                         });
-                        if (val != null) _fetchCities();
+                        if (val != null && val != 'All') _fetchCities();
                         _fetchPlaces();
                       },
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _buildDropdown(
+                    child: _buildSearchableDropdown(
                       hint: 'City',
+                      controller: _cityController,
                       value: _selectedCity,
                       items: _cities,
                       onChanged: (val) {
@@ -340,7 +349,9 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                       onPressed: () {
                         setState(() {
                           _selectedState = null;
+                          _stateController.clear();
                           _selectedCity = null;
+                          _cityController.clear();
                           _cities = [];
                         });
                         _fetchPlaces();
@@ -398,24 +409,53 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
     );
   }
 
-  Widget _buildDropdown({required String hint, required String? value, required List<String> items, required ValueChanged<String?> onChanged}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.borderColor),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isExpanded: true,
-          hint: Text(hint, style: const TextStyle(fontSize: 13, color: AppTheme.textMutedColor)),
-          value: value,
-          items: items.map((item) => DropdownMenuItem(value: item, child: Text(item, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis))).toList(),
-          onChanged: onChanged,
-          icon: const Icon(Icons.keyboard_arrow_down, size: 18, color: AppTheme.textMutedColor),
-        ),
-      ),
+  Widget _buildSearchableDropdown({
+    required String hint, 
+    required TextEditingController controller,
+    required String? value, 
+    required List<String> items, 
+    required ValueChanged<String?> onChanged
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return DropdownMenu<String>(
+          width: constraints.maxWidth,
+          controller: controller,
+          initialSelection: value,
+          hintText: hint,
+          enableSearch: true,
+          enableFilter: true,
+          textStyle: const TextStyle(fontSize: 13),
+          menuStyle: MenuStyle(
+            backgroundColor: MaterialStateProperty.all(Theme.of(context).cardColor),
+            maximumSize: MaterialStateProperty.all(const Size.fromHeight(300)),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            isDense: true,
+            filled: true,
+            fillColor: Theme.of(context).cardColor,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: AppTheme.borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: AppTheme.borderColor),
+            ),
+          ),
+          dropdownMenuEntries: items.map((item) {
+            return DropdownMenuEntry<String>(
+              value: item,
+              label: item,
+              style: MenuItemButton.styleFrom(
+                textStyle: const TextStyle(fontSize: 13),
+              ),
+            );
+          }).toList(),
+          onSelected: onChanged,
+        );
+      }
     );
   }
 

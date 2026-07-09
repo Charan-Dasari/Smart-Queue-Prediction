@@ -25,25 +25,40 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   bool _notOnboarded = false;
   String _error = '';
 
-  final List<Map<String, dynamic>> _timeSlots = [
-    {'time': '09:00 AM', 'available': true, 'crowd': 0.2},
-    {'time': '09:30 AM', 'available': true, 'crowd': 0.3},
-    {'time': '10:00 AM', 'available': true, 'crowd': 0.6},
-    {'time': '10:30 AM', 'available': false, 'crowd': 0.9},
-    {'time': '11:00 AM', 'available': true, 'crowd': 0.8},
-    {'time': '11:30 AM', 'available': true, 'crowd': 0.5},
-    {'time': '12:00 PM', 'available': false, 'crowd': 1.0},
-    {'time': '02:00 PM', 'available': true, 'crowd': 0.3},
-    {'time': '02:30 PM', 'available': true, 'crowd': 0.2},
-    {'time': '03:00 PM', 'available': true, 'crowd': 0.4},
-    {'time': '03:30 PM', 'available': true, 'crowd': 0.6},
-    {'time': '04:00 PM', 'available': true, 'crowd': 0.7},
-  ];
+  List<Map<String, dynamic>> _timeSlots = [];
 
   @override
   void initState() {
     super.initState();
-    // Pick a random available slot for the mock AI recommendation
+    _fetchProviderDetails();
+  }
+
+  void _generateMockTimeSlots() {
+    _timeSlots.clear();
+    bool isRestaurant = _provider?.category == ServiceCategory.restaurant;
+    int startHour = isRestaurant ? 12 : 9;
+    int endHour = isRestaurant ? 22 : 18;
+
+    for (int hour = startHour; hour <= endHour; hour++) {
+      for (int min = 0; min < 60; min += 30) {
+        if (hour == endHour && min > 0) continue;
+        final h = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+        final ampm = hour >= 12 ? 'PM' : 'AM';
+        final timeStr = '${h.toString().padLeft(2, '0')}:${min.toString().padLeft(2, '0')} $ampm';
+        
+        // Mock unavailability
+        bool available = true;
+        if (isRestaurant && (hour == 15 || hour == 20)) available = false;
+        if (!isRestaurant && (hour == 12 || hour == 14)) available = false;
+
+        _timeSlots.add({
+          'time': timeStr,
+          'available': available,
+          'crowd': 0.2 + ((hour * min) % 4) * 0.15,
+        });
+      }
+    }
+
     final availableIndices = [];
     for (int i = 0; i < _timeSlots.length; i++) {
       if (_timeSlots[i]['available'] == true) {
@@ -54,8 +69,6 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
       availableIndices.shuffle();
       _aiRecommendedSlotIndex = availableIndices.first;
     }
-    
-    _fetchProviderDetails();
   }
 
   Future<void> _fetchProviderDetails() async {
@@ -71,8 +84,11 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         setState(() {
           _provider = ServiceProviderInfo.fromJson(data);
           
-          // Filter out services that don't have assigned counters based on name matching
-          _provider!.services.retainWhere((s) => activeServiceNames.contains(s.name.toLowerCase()));
+          if (activeServiceNames.isNotEmpty) {
+            _provider!.services.retainWhere((s) => activeServiceNames.contains(s.name.toLowerCase()));
+          }
+          
+          _generateMockTimeSlots();
 
           if (_provider!.services.isNotEmpty) {
             _selectedServiceId = _provider!.services.first.id;
@@ -195,6 +211,40 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
       );
     }
 
+    Color categoryColor = AppTheme.primaryColor;
+    IconData categoryIcon = Icons.place;
+
+    switch (_provider!.category) {
+      case ServiceCategory.hospital:
+        categoryColor = AppTheme.hospitalColor;
+        categoryIcon = Icons.local_hospital;
+        break;
+      case ServiceCategory.bank:
+        categoryColor = AppTheme.bankColor;
+        categoryIcon = Icons.account_balance;
+        break;
+      case ServiceCategory.restaurant:
+        categoryColor = AppTheme.restaurantColor;
+        categoryIcon = Icons.restaurant;
+        break;
+      case ServiceCategory.college:
+        categoryColor = AppTheme.collegeColor;
+        categoryIcon = Icons.school;
+        break;
+      case ServiceCategory.governmentOffice:
+        categoryColor = AppTheme.govtColor;
+        categoryIcon = Icons.account_balance_outlined;
+        break;
+      case ServiceCategory.hotel:
+        categoryColor = Colors.indigo;
+        categoryIcon = Icons.hotel;
+        break;
+      default:
+        categoryColor = AppTheme.otherColor;
+        categoryIcon = Icons.business;
+        break;
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -222,10 +272,10 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: AppTheme.hospitalColor.withOpacity(0.1),
+                      color: categoryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.local_hospital, color: AppTheme.hospitalColor, size: 26),
+                    child: Icon(categoryIcon, color: categoryColor, size: 26),
                   ),
                   const SizedBox(width: 14),
                   Expanded(

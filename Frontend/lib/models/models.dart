@@ -88,9 +88,23 @@ class ServiceProviderInfo {
     return ServiceProviderInfo(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
-      category: ServiceCategory.values.firstWhere(
-          (e) => e.name.toLowerCase() == (json['category'] ?? 'other').toString().toLowerCase(),
-          orElse: () => ServiceCategory.other),
+      category: () {
+        final catRaw = json['category'];
+        if (catRaw is int) {
+          if (catRaw >= 0 && catRaw < ServiceCategory.values.length) {
+            return ServiceCategory.values[catRaw];
+          }
+          return ServiceCategory.other;
+        } else if (catRaw is String) {
+          final catString = catRaw.toLowerCase();
+          if (catString == 'govtoffice') return ServiceCategory.governmentOffice;
+          return ServiceCategory.values.firstWhere(
+            (e) => e.name.toLowerCase() == catString,
+            orElse: () => ServiceCategory.other,
+          );
+        }
+        return ServiceCategory.other;
+      }(),
       address: json['address'] ?? '',
       rating: (json['rating'] ?? 0.0).toDouble(),
       distanceKm: (json['distanceKm'] ?? 0.0).toDouble(),

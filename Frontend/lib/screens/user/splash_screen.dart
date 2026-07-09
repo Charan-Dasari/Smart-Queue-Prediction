@@ -124,29 +124,9 @@ class _SplashScreenState extends State<SplashScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
-                      'assets/images/splash_logo.png',
-                      width: 150,
+                      'assets/images/logo_text.png',
+                      height: 120,
                       fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'IntelliQ',
-                      style: TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Smart Queue Management',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white.withOpacity(0.7),
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                      ),
                     ),
                   ],
                 ),

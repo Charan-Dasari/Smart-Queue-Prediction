@@ -81,7 +81,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     final bankCount = data['bankCount'] ?? 0;
     final collegeCount = data['collegeCount'] ?? 0;
     final hospitalCount = data['hospitalCount'] ?? 0;
-    final govtCount = data['govtOfficeCount'] ?? 0;
+    final restaurantCount = data['restaurantCount'] ?? 0;
     
     final providers = data['providers'] as List<dynamic>? ?? [];
 
@@ -135,7 +135,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 const SizedBox(width: 8),
                 Expanded(child: _buildPlatformStat('Hospitals', '$hospitalCount', AppTheme.hospitalColor)),
                 const SizedBox(width: 8),
-                Expanded(child: _buildPlatformStat('Govt Offices', '$govtCount', AppTheme.govtColor)),
+                Expanded(child: _buildPlatformStat('Restaurants', '$restaurantCount', AppTheme.restaurantColor)),
               ],
             ),
             const SizedBox(height: 24),
@@ -226,8 +226,22 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   }
 
   Widget _buildClientTile(Map<String, dynamic> p) {
-    // Enum values: 0=Hospital, 1=Bank, 2=GovtOffice, 3=College, 4=Other
-    final categoryInt = p['category'] ?? 0;
+    final categoryRaw = p['category'];
+    int categoryInt = 0;
+    if (categoryRaw is int) {
+      categoryInt = categoryRaw;
+    } else if (categoryRaw is String) {
+      switch (categoryRaw.toLowerCase()) {
+        case 'bank': categoryInt = 1; break;
+        case 'govtoffice': categoryInt = 2; break;
+        case 'college': categoryInt = 3; break;
+        case 'restaurant': categoryInt = 4; break;
+        case 'hotel': categoryInt = 5; break;
+        case 'other': categoryInt = 6; break;
+        case 'hospital':
+        default: categoryInt = 0; break;
+      }
+    }
     
     Color badgeColor;
     IconData icon;
@@ -248,6 +262,11 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         badgeColor = AppTheme.collegeColor;
         icon = Icons.school;
         categoryName = 'College';
+        break;
+      case 4:
+        badgeColor = AppTheme.restaurantColor;
+        icon = Icons.restaurant;
+        categoryName = 'Restaurant';
         break;
       case 0:
       default:
@@ -287,7 +306,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 const SizedBox(height: 4),
                 SelectableText('Email: $adminEmail', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
                 const SizedBox(height: 2),
-                SelectableText('Password: ${(p['name'] ?? '').toString().trim().toLowerCase().replaceAll(' ', '').replaceAll('-', '')}@2024', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
+                SelectableText('Password: ${(p['name'] ?? '').toString().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase()}@123', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
               ],
             ),
           ),
@@ -307,7 +326,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             icon: const Icon(Icons.copy, color: AppTheme.primaryColor, size: 20),
             tooltip: 'Copy Credentials',
             onPressed: () {
-              final pwd = '${(p['name'] ?? '').toString().trim().toLowerCase().replaceAll(' ', '').replaceAll('-', '')}@2024';
+              final pwd = '${(p['name'] ?? '').toString().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase()}@123';
               Clipboard.setData(ClipboardData(text: 'Email: $adminEmail\nPassword: $pwd'));
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Credentials copied to clipboard')));
             },
@@ -335,16 +354,25 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
   List<dynamic> _places = [];
   bool _isLoading = false;
   String _error = '';
+  String _selectedCategory = 'All';
+  Timer? _debounce;
 
-  Future<void> _searchPlaces(String query) async {
-    if (query.isEmpty) {
-      setState(() { _places = []; _error = ''; });
-      return;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _searchPlaces('');
+  }
+
+  Future<void> _searchPlaces(String query, {String? category}) async {
+    final catToUse = category ?? _selectedCategory;
 
     setState(() { _isLoading = true; _error = ''; });
     try {
-      final data = await ApiService.getPlaces(query: query, pageSize: 10);
+      final data = await ApiService.getPlaces(
+        query: query, 
+        category: catToUse == 'All' ? null : catToUse, 
+        pageSize: 10
+      );
       if (mounted) {
         setState(() {
           _places = data['places'] ?? [];
@@ -359,6 +387,25 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
         });
       }
     }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _searchPlaces(query);
+    });
+  }
+
+  void _onCategorySelected(String category) {
+    setState(() => _selectedCategory = category);
+    _searchPlaces(_searchController.text, category: category);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _onboardPlace(Map<String, dynamic> place) async {
@@ -426,7 +473,23 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onSubmitted: _searchPlaces,
+              onChanged: _onSearchChanged,
+            ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: ['All', 'Hospital', 'Bank', 'College', 'Restaurant'].map((cat) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(cat),
+                      selected: _selectedCategory == cat,
+                      onSelected: (selected) => _onCategorySelected(cat),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(

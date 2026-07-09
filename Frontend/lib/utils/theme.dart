@@ -40,6 +40,7 @@ class AppTheme {
   static const Color bankColor = Color(0xFF10B981);        // Green
   static const Color govtColor = Color(0xFFF59E0B);        // Amber
   static const Color collegeColor = Color(0xFF8B5CF6);     // Purple
+  static const Color restaurantColor = Color(0xFFE11D48);  // Rose
   static const Color otherColor = Color(0xFF6B7280);       // Gray
 
   // ─── Border & Divider ─────────────────────────────────────────────────────

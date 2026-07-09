@@ -236,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       context.push('/help-support');
                     }),
                     const Divider(color: AppTheme.dividerColor, height: 0),
-                    _buildMenuItem(Icons.info_outline, 'About IntelliQ', 'Version 1.0.0', () {
+                    _buildMenuItem(Icons.info_outline, 'About IntelliQ', 'Version 0.2.5', () {
                       context.push('/about');
                     }),
                   ],
