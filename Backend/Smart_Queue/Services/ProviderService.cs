@@ -165,6 +165,50 @@ public class ProviderService
 
         if (provider == null) return null;
 
+        var services = provider.Services.Select(s => new ServiceDto
+        {
+            Id = s.Id,
+            Name = s.Name,
+            Description = s.Description,
+            AvgDurationMinutes = s.AvgDurationMinutes,
+            Cost = s.Cost,
+            IsActive = s.IsActive,
+            ProviderId = s.ProviderId,
+        }).ToList();
+
+        if (provider.Category == ServiceCategory.Restaurant && services.Count == 0)
+        {
+            var newServices = new List<Service>
+            {
+                new Service { Id = Guid.NewGuid(), Name = "Table for 1-2", Description = "Standard seating for couple", AvgDurationMinutes = 45, Cost = 0, IsActive = true, ProviderId = providerId },
+                new Service { Id = Guid.NewGuid(), Name = "Table for 3-4", Description = "Standard seating for up to 4", AvgDurationMinutes = 60, Cost = 0, IsActive = true, ProviderId = providerId },
+                new Service { Id = Guid.NewGuid(), Name = "Family Table (5+)", Description = "Large seating area", AvgDurationMinutes = 90, Cost = 0, IsActive = true, ProviderId = providerId },
+            };
+            
+            _db.Services.AddRange(newServices);
+            await _db.SaveChangesAsync();
+
+            services = newServices.Select(s => new ServiceDto
+            {
+                Id = s.Id, Name = s.Name, Description = s.Description, AvgDurationMinutes = s.AvgDurationMinutes, Cost = s.Cost, IsActive = s.IsActive, ProviderId = s.ProviderId
+            }).ToList();
+        }
+        else if (services.Count == 0)
+        {
+            var newServices = new List<Service>
+            {
+                new Service { Id = Guid.NewGuid(), Name = "General Service", Description = "Standard queue service", AvgDurationMinutes = 15, Cost = 0, IsActive = true, ProviderId = providerId }
+            };
+
+            _db.Services.AddRange(newServices);
+            await _db.SaveChangesAsync();
+
+            services = newServices.Select(s => new ServiceDto
+            {
+                Id = s.Id, Name = s.Name, Description = s.Description, AvgDurationMinutes = s.AvgDurationMinutes, Cost = s.Cost, IsActive = s.IsActive, ProviderId = s.ProviderId
+            }).ToList();
+        }
+
         return new ProviderWithServicesDto
         {
             Id = provider.Id,
@@ -174,16 +218,7 @@ public class ProviderService
             Rating = provider.Rating,
             IsActive = provider.IsActive,
             CreatedAt = provider.CreatedAt,
-            Services = provider.Services.Select(s => new ServiceDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Description = s.Description,
-                AvgDurationMinutes = s.AvgDurationMinutes,
-                Cost = s.Cost,
-                IsActive = s.IsActive,
-                ProviderId = s.ProviderId,
-            }).ToList(),
+            Services = services,
         };
     }
 }

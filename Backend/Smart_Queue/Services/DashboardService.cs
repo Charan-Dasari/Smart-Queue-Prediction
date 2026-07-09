@@ -157,7 +157,7 @@ public class DashboardService
             HospitalCount = providers.Count(p => p.Category == ServiceCategory.Hospital),
             BankCount = providers.Count(p => p.Category == ServiceCategory.Bank),
             CollegeCount = providers.Count(p => p.Category == ServiceCategory.College),
-            GovtOfficeCount = providers.Count(p => p.Category == ServiceCategory.GovtOffice),
+            RestaurantCount = providers.Count(p => p.Category == ServiceCategory.Restaurant),
             TotalUsers = totalUsers,
             Providers = providers.Select(p => new ProviderDto
             {

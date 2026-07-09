@@ -151,17 +151,24 @@ public class PlacesController : ControllerBase
             distanceKm = 2.5,
             activeQueueCount = 0,
             estimatedWaitMinutes = 0,
-            services = new[]
-            {
-                new {
-                    id = Guid.NewGuid().ToString(),
-                    name = "General Service",
-                    description = "Standard queue service",
-                    avgDurationMinutes = 15,
-                    cost = 0,
-                    isActive = true
+            services = place.Category == "Restaurant"
+                ? new[]
+                {
+                    new { id = Guid.NewGuid().ToString(), name = "Table for 1-2", description = "Standard seating for couple", avgDurationMinutes = 45, cost = 0, isActive = true },
+                    new { id = Guid.NewGuid().ToString(), name = "Table for 3-4", description = "Standard seating for up to 4", avgDurationMinutes = 60, cost = 0, isActive = true },
+                    new { id = Guid.NewGuid().ToString(), name = "Family Table (5+)", description = "Large seating area", avgDurationMinutes = 90, cost = 0, isActive = true },
                 }
-            }
+                : new[]
+                {
+                    new {
+                        id = Guid.NewGuid().ToString(),
+                        name = "General Service",
+                        description = "Standard queue service",
+                        avgDurationMinutes = 15,
+                        cost = 0,
+                        isActive = true
+                    }
+                }
         };
 
         return Ok(providerInfo);

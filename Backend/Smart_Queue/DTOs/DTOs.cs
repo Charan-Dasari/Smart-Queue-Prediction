@@ -295,7 +295,7 @@ public class SuperAdminDashboardDto
     public int HospitalCount { get; set; }
     public int BankCount { get; set; }
     public int CollegeCount { get; set; }
-    public int GovtOfficeCount { get; set; }
+    public int RestaurantCount { get; set; }
     public int TotalUsers { get; set; }
     public List<ProviderDto> Providers { get; set; } = new();
 }
