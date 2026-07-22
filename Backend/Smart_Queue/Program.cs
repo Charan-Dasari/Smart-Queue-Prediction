@@ -79,7 +79,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartQueueDbContext>();
     await db.Database.MigrateAsync();
-    // await DbSeeder.SeedAsync(db); // Disabled dummy seeding per user request
+    await DbSeeder.SeedAsync(db); // Seed test users + providers
 
     // Import CSV datasets into Places table
     var datasetsFolder = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Datasets_Clean");
