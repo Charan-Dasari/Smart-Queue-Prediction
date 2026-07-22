@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../../services/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import '../../widgets/smart_search_bar.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
   const SuperAdminDashboardScreen({super.key});
@@ -350,12 +351,12 @@ class ProviderOnboardingDialog extends StatefulWidget {
 }
 
 class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
-  final TextEditingController _searchController = TextEditingController();
   List<dynamic> _places = [];
   bool _isLoading = false;
   String _error = '';
   String _selectedCategory = 'All';
   Timer? _debounce;
+  String _lastQuery = '';
 
   @override
   void initState() {
@@ -389,22 +390,15 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
     }
   }
 
-  void _onSearchChanged(String query) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      _searchPlaces(query);
-    });
-  }
 
   void _onCategorySelected(String category) {
     setState(() => _selectedCategory = category);
-    _searchPlaces(_searchController.text, category: category);
+    _searchPlaces(_lastQuery, category: category);
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -466,14 +460,13 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
             ),
             const Text('Search the dataset to give access to an organization.', style: TextStyle(color: AppTheme.textMutedColor)),
             const SizedBox(height: 16),
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by name or city...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onChanged: _onSearchChanged,
+            // ── Smart Search Bar ──
+            SmartSearchBar(
+              onPlaceSelected: (place) => _onboardPlace(place),
+              onQuerySubmitted: (query) {
+                _lastQuery = query;
+                _searchPlaces(query);
+              },
             ),
             const SizedBox(height: 12),
             SingleChildScrollView(

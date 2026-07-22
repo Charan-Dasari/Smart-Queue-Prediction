@@ -16,6 +16,22 @@ class _AppointmentManagementScreenState extends State<AppointmentManagementScree
   List<Appointment> _appointments = [];
   bool _isLoading = true;
   String _error = '';
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Appointment> get _filtered => _searchQuery.isEmpty
+      ? _appointments
+      : _appointments.where((a) {
+          final q = _searchQuery.toLowerCase();
+          return a.tokenNumber.toLowerCase().contains(q) ||
+                 a.serviceName.toLowerCase().contains(q);
+        }).toList();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -44,8 +60,8 @@ class _AppointmentManagementScreenState extends State<AppointmentManagementScree
 
   @override
   Widget build(BuildContext context) {
-    int upcoming = _appointments.where((a) => a.status == AppointmentStatus.upcoming).length;
-    int completed = _appointments.where((a) => a.status == AppointmentStatus.completed).length;
+    int upcoming  = _filtered.where((a) => a.status == AppointmentStatus.upcoming).length;
+    int completed  = _filtered.where((a) => a.status == AppointmentStatus.completed).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,22 +89,49 @@ class _AppointmentManagementScreenState extends State<AppointmentManagementScree
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Search & Filter ──
+                      // ── Smart Search Bar (local filter) ──
                       Row(
                         children: [
                           Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppTheme.borderColor),
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: _searchController.text.isNotEmpty
+                                      ? AppTheme.primaryColor.withOpacity(0.5)
+                                      : AppTheme.borderColor,
+                                  width: _searchController.text.isNotEmpty ? 1.5 : 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: const TextField(
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (v) => setState(() => _searchQuery = v),
                                 decoration: InputDecoration(
-                                  icon: Icon(Icons.search, color: AppTheme.textMutedColor),
-                                  hintText: 'Search token or name...',
+                                  hintText: 'Search by token or service name...',
+                                  hintStyle: const TextStyle(fontSize: 14, color: AppTheme.textLightColor),
+                                  prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textMutedColor, size: 22),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.close_rounded, size: 18, color: AppTheme.textLightColor),
+                                          onPressed: () => setState(() {
+                                            _searchController.clear();
+                                            _searchQuery = '';
+                                          }),
+                                        )
+                                      : null,
                                   border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                 ),
                               ),
                             ),
@@ -100,10 +143,18 @@ class _AppointmentManagementScreenState extends State<AppointmentManagementScree
                               color: AppTheme.primaryColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.tune, color: AppTheme.primaryColor, size: 24),
+                            child: const Icon(Icons.tune_rounded, color: AppTheme.primaryColor, size: 24),
                           ),
                         ],
                       ),
+                      if (_searchQuery.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            '${_filtered.length} result${_filtered.length == 1 ? '' : 's'} found',
+                            style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor, fontWeight: FontWeight.w500),
+                          ),
+                        ),
                       const SizedBox(height: 24),
 
                       // ── Date Selector ──
@@ -192,13 +243,13 @@ class _AppointmentManagementScreenState extends State<AppointmentManagementScree
                       const SizedBox(height: 24),
 
                       // ── Appointment List ──
-                      if (_appointments.isEmpty)
+                      if (_filtered.isEmpty)
                         const Center(child: Padding(
                           padding: EdgeInsets.all(20),
                           child: Text('No appointments found.', style: TextStyle(color: AppTheme.textMutedColor)),
                         )),
 
-                      ..._appointments.map((apt) {
+                      ..._filtered.map((apt) {
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),

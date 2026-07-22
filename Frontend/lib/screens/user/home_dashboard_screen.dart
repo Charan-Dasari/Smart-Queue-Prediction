@@ -5,6 +5,7 @@ import '../../utils/theme.dart';
 import '../../models/models.dart';
 import '../../services/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../widgets/smart_search_bar.dart';
 
 class HomeDashboardScreen extends StatefulWidget {
   const HomeDashboardScreen({super.key});
@@ -135,8 +136,16 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // ── Search Bar ──
-                      _buildSmartSearchBar(context),
+                      // ── Smart Search Bar ──
+                      SmartSearchBar(
+                        onPlaceSelected: (place) {
+                          final placeId = place['id'];
+                          if (placeId != null) context.push('/booking/$placeId');
+                        },
+                        onQuerySubmitted: (query) {
+                          context.push('/services');
+                        },
+                      ),
                       const SizedBox(height: 24),
 
                       // ── Current Queue Status Card ──
@@ -629,118 +638,5 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     );
   }
 
-  Widget _buildSmartSearchBar(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Autocomplete<Map<String, dynamic>>(
-          optionsBuilder: (TextEditingValue textEditingValue) async {
-            if (textEditingValue.text.isEmpty) {
-              return const Iterable<Map<String, dynamic>>.empty();
-            }
-            try {
-              final data = await ApiService.getPlaces(query: textEditingValue.text, pageSize: 5);
-              final List<dynamic>? places = data['places'];
-              if (places == null) return const Iterable<Map<String, dynamic>>.empty();
-              return places.map((e) => e as Map<String, dynamic>);
-            } catch (e) {
-              return const Iterable<Map<String, dynamic>>.empty();
-            }
-          },
-          displayStringForOption: (Map<String, dynamic> option) => (option['name'] ?? '').toString(),
-          onSelected: (Map<String, dynamic> selection) {
-            final placeId = selection['id'];
-            if (placeId != null) {
-              context.push('/booking/$placeId');
-            }
-          },
-          fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.borderColor),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                onSubmitted: (String value) {
-                  onFieldSubmitted();
-                  if (value.isNotEmpty) {
-                     context.push('/services');
-                  }
-                },
-                decoration: const InputDecoration(
-                  hintText: 'Search Hospital, Bank, College...',
-                  hintStyle: TextStyle(fontSize: 14, color: AppTheme.textLightColor),
-                  prefixIcon: Icon(Icons.search, color: AppTheme.textMutedColor, size: 20),
-                  suffixIcon: Icon(Icons.tune, color: AppTheme.textLightColor, size: 18),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-              ),
-            );
-          },
-          optionsViewBuilder: (context, onSelected, options) {
-            return Align(
-              alignment: Alignment.topLeft,
-              child: Material(
-                elevation: 4,
-                borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context).cardColor,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: 250, 
-                    maxWidth: constraints.maxWidth,
-                  ),
-                  child: ListView.separated(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    separatorBuilder: (context, index) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final option = options.elementAt(index);
-                      final name = option['name'] ?? '';
-                      final category = option['category'] ?? '';
-                      final city = option['city'] ?? '';
-                      
-                      IconData icon = Icons.place;
-                      Color iconColor = AppTheme.primaryColor;
-                      switch (category) {
-                        case 'Hospital': icon = Icons.local_hospital; iconColor = AppTheme.hospitalColor; break;
-                        case 'Bank': icon = Icons.account_balance; iconColor = AppTheme.bankColor; break;
-                        case 'Restaurant': icon = Icons.restaurant; iconColor = AppTheme.restaurantColor; break;
-                        case 'College': icon = Icons.school; iconColor = AppTheme.collegeColor; break;
-                        case 'GovtOffice': icon = Icons.account_balance_outlined; iconColor = AppTheme.govtColor; break;
-                      }
 
-                      return ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: iconColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(icon, color: iconColor, size: 20),
-                        ),
-                        title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        subtitle: Text('$category • $city', style: const TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
-                        onTap: () => onSelected(option),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      }
-    );
-  }
 }

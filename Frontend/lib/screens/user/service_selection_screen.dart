@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/theme.dart';
 import '../../services/api_service.dart';
+import '../../widgets/smart_search_bar.dart';
 
 class ServiceSelectionScreen extends StatefulWidget {
   final String? initialCategory;
@@ -271,42 +272,16 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
           child: Column(
             children: [
-              // Search Bar
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppTheme.borderColor),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onSubmitted: (_) => _fetchPlaces(),
-                  decoration: InputDecoration(
-                    hintText: 'Search by name, city, or state...',
-                    hintStyle: TextStyle(color: AppTheme.textMutedColor.withOpacity(0.5)),
-                    prefixIcon: const Icon(Icons.search, color: AppTheme.textMutedColor, size: 20),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              _fetchPlaces();
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  ),
-                ),
+              // Smart Search Bar
+              SmartSearchBar(
+                onPlaceSelected: (place) {
+                  final placeId = place['id'];
+                  if (placeId != null) context.push('/booking/$placeId');
+                },
+                onQuerySubmitted: (query) {
+                  _searchController.text = query;
+                  _fetchPlaces();
+                },
               ),
               const SizedBox(height: 12),
               // State & City Filters
