@@ -122,13 +122,15 @@ public class ProviderService
             var queueCount = await _db.QueueTokens
                 .CountAsync(t => t.ProviderId == p.Id && (t.Status == AppointmentStatus.InQueue || t.Status == AppointmentStatus.Serving));
 
-            var avgWait = queueCount > 0
-                ? await _db.QueueTokens
+            var avgWait = 0.0;
+            if (queueCount > 0)
+            {
+                var waitMinutes = await _db.QueueTokens
                     .Where(t => t.ProviderId == p.Id && t.Status == AppointmentStatus.InQueue)
                     .Select(t => t.EstimatedWaitMinutes)
-                    .DefaultIfEmpty(0)
-                    .AverageAsync()
-                : 0;
+                    .ToListAsync();
+                avgWait = waitMinutes.Count > 0 ? waitMinutes.Average() : 0;
+            }
 
             // Get admin email
             var adminEmail = await _db.Users

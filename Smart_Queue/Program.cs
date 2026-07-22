@@ -51,6 +51,12 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<ProviderService>();
 
+// Register ML Prediction Service with HttpClient
+builder.Services.AddHttpClient<MlPredictionService>(client =>
+{
+    client.BaseAddress = new Uri("http://127.0.0.1:8000");
+});
+
 // ── Controllers ──
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

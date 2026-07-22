@@ -58,7 +58,7 @@ public class DashboardService
     public async Task<AdminDashboardDto> GetAdminDashboardAsync(Guid providerId)
     {
         var todayStart = DateTime.UtcNow.Date;
-        var provider = await _db.Places.FindAsync(providerId);
+        var provider = await _db.ServiceProviders.FindAsync(providerId);
 
         var todayAppointments = await _db.Appointments.CountAsync(a => a.ProviderId == providerId && a.Date >= todayStart);
         var activeQueues = await _db.QueueTokens.CountAsync(t => t.ProviderId == providerId && (t.Status == AppointmentStatus.InQueue || t.Status == AppointmentStatus.Serving));
@@ -80,7 +80,7 @@ public class DashboardService
             ServedToday = servedToday,
             SatisfactionScore = provider?.Rating ?? 0.0,
             ProviderName = provider?.Name ?? "",
-            ProviderCategory = provider?.Category ?? "Other",
+            ProviderCategory = provider?.Category.ToString() ?? "Other",
         };
     }
 
@@ -90,7 +90,7 @@ public class DashboardService
         if (user?.ProviderId == null) return new StaffDashboardDto();
 
         var providerId = user.ProviderId.Value;
-        var provider = await _db.Places.FindAsync(providerId);
+        var provider = await _db.ServiceProviders.FindAsync(providerId);
 
         var counter = await _db.ServiceCounters
             .Include(c => c.ActiveToken)
@@ -115,7 +115,7 @@ public class DashboardService
         {
             StaffName = user.Name,
             ProviderName = provider?.Name ?? "",
-            ProviderCategory = provider?.Category ?? "Other",
+            ProviderCategory = provider?.Category.ToString() ?? "Other",
             AssignedCounter = counter != null ? new CounterDto
             {
                 Id = counter.Id,

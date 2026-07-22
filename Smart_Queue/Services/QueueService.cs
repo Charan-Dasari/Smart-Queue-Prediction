@@ -8,8 +8,13 @@ namespace Smart_Queue.Services;
 public class QueueService
 {
     private readonly SmartQueueDbContext _db;
+    private readonly MlPredictionService _mlService;
 
-    public QueueService(SmartQueueDbContext db) => _db = db;
+    public QueueService(SmartQueueDbContext db, MlPredictionService mlService)
+    {
+        _db = db;
+        _mlService = mlService;
+    }
 
     /// <summary>
     /// Generate next token number for a provider (e.g., H-201, B-301)
@@ -48,7 +53,15 @@ public class QueueService
             .CountAsync();
 
         var service = await _db.Services.FindAsync(serviceId);
-        var estimatedWait = (waitingCount + 1) * (service?.AvgDurationMinutes ?? 15);
+        
+        // ML Model Prediction
+        var activeStaff = await _db.ServiceCounters.CountAsync(c => c.ProviderId == providerId && c.Status == CounterStatus.Active);
+        var estimatedWait = await _mlService.PredictWaitTimeAsync(
+            queueLength: waitingCount + 1,
+            serviceType: service?.Name ?? "general",
+            priorityLevel: "normal",
+            activeStaffCount: activeStaff > 0 ? activeStaff : 1
+        );
 
         var token = new QueueToken
         {
@@ -110,10 +123,17 @@ public class QueueService
             .OrderBy(t => t.Position)
             .ToListAsync();
 
+        var activeStaff = await _db.ServiceCounters.CountAsync(c => c.ProviderId == counter.ProviderId && c.Status == CounterStatus.Active);
+
         for (int i = 0; i < remainingTokens.Count; i++)
         {
             remainingTokens[i].Position = i + 1;
-            remainingTokens[i].EstimatedWaitMinutes = (i + 1) * 8; // Rough estimate
+            remainingTokens[i].EstimatedWaitMinutes = await _mlService.PredictWaitTimeAsync(
+                queueLength: i + 1,
+                serviceType: remainingTokens[i].Service?.Name ?? "general",
+                priorityLevel: "normal",
+                activeStaffCount: activeStaff > 0 ? activeStaff : 1
+            );
         }
 
         await _db.SaveChangesAsync();
