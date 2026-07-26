@@ -34,6 +34,7 @@
 - [API Overview](#-api-overview)
 - [ML Model](#-ml-model)
 - [Screenshots](#-screenshots)
+- [Version History](#-version-history)
 - [Contributing](#-contributing)
 
 ---
@@ -345,6 +346,82 @@ The AI slot prediction system uses a **Random Forest Regressor** trained on queu
 ## 📸 Screenshots
 
 > App screenshots and demo videos available in the `doc/` directory.
+
+---
+
+## 📈 Version History
+
+A timeline of the project's growth from a concept to a fully integrated system:
+
+---
+
+### `v0.1` — Project Foundation *(Sprint 1)*
+> 🗓️ Initial setup & planning phase
+
+- [x] Defined project scope, problem statement, and use cases
+- [x] Designed database schema and ER diagram
+- [x] Set up ASP.NET Core project structure with EF Core
+- [x] Created initial SQL Server database with basic `User` and `ServiceProvider` models
+- [x] Set up Flutter project with basic folder structure
+- [x] Initial `README.md` and project documentation
+
+---
+
+### `v0.25` — Core Frontend & Backend *(Sprint 2)*
+> 🗓️ Authentication, screens, and REST API foundation
+
+- [x] **Backend:** JWT authentication system (`AuthController` — register, login, role-based tokens)
+- [x] **Backend:** Core REST endpoints for Queue, Appointments, Services, Counters
+- [x] **Backend:** Entity Framework migrations and `DbSeeder.cs` with pre-seeded Hospitals, Banks, Govt Offices
+- [x] **Frontend:** Full Flutter navigation using `go_router` with role-based routing
+- [x] **Frontend:** User screens — Login, Register, Home Dashboard, Service Selection, Appointment Booking
+- [x] **Frontend:** Admin screens — Admin Login, Admin Dashboard, Service & Staff Management
+- [x] **Frontend:** Staff screens — Staff Dashboard, Live Queue View
+- [x] **Frontend:** Glassmorphism UI design system with custom floating capsule nav bar
+- [x] **Frontend:** `api_service.dart` integration — all screens wired to live backend
+
+---
+
+### `v0.5` — Queue Intelligence & Digital Tokens *(Sprint 3)*
+> 🗓️ Real-time queue tracking and QR token generation
+
+- [x] **Backend:** `QueueController` — join queue, advance token, live position tracking
+- [x] **Backend:** `NotificationsController` — in-app alert system
+- [x] **Backend:** Role management with Super Admin provider claim flow
+- [x] **Frontend:** Digital Token screen with QR code generation (`qr_flutter`)
+- [x] **Frontend:** Live Queue Tracking screen with real-time position updates
+- [x] **Frontend:** My Tokens screen — active, upcoming, and completed token history
+- [x] **Frontend:** Notifications screen
+- [x] **Frontend:** Booking Confirmation screen with token summary
+
+---
+
+### `v0.75` — ML Model & AI Slot Prediction *(Sprint 4)*
+> 🗓️ Machine learning integration and analytics
+
+- [x] **ML:** Collected and cleaned queue management datasets (Banks, Hospitals, Restaurants, Colleges)
+- [x] **ML:** Trained Random Forest Regressor model for wait time prediction
+- [x] **ML:** Built FastAPI prediction server (`api.py`) serving `/predict_wait_time` endpoint
+- [x] **Backend:** `MlPredictionService.cs` — .NET service calling the Python ML API
+- [x] **Frontend:** Smart Slot screen — AI-recommended time slots with predicted wait times
+- [x] **Frontend:** AI Prediction screen (Admin) — visualize model insights
+- [x] **Frontend:** Analytics Dashboard — token volume, service stats, daily trends
+- [x] **Backend:** `DashboardController` + `DashboardService` for aggregated analytics
+
+---
+
+### `v1.0` — Polish, Dark Mode & Final Release *(Sprint 5)*
+> 🗓️ Production-ready release with full feature completeness
+
+- [x] **Frontend:** Dark Mode / Light Mode toggle with per-user persistence
+- [x] **Frontend:** Dark mode preference saved per `userId` in `SharedPreferences` — survives logout/login
+- [x] **Frontend:** Theme resets to Light on logout, restores user's saved preference on re-login
+- [x] **Frontend:** `UserThemeWrapper` applied across all role screens (User, Staff, Admin)
+- [x] **Frontend:** About screen, Help & Support screen, Profile screen
+- [x] **Frontend:** Forgot Password flow
+- [x] **Backend:** Public tunneling support for remote device testing
+- [x] **Full:** GitHub structured into 4 branches (`main`, `Frontend`, `Backend`, `ml-model`)
+- [x] **Full:** Comprehensive README with setup guide, API reference, and test credentials
 
 ---
 
