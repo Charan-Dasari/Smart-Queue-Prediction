@@ -1,0 +1,27 @@
+# Flutter / Dart
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+**/android/.gradle/
+**/android/app/build/
+
+# .NET / C#
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/*.suo
+**/App_Data/
+
+# IDE / System
+.idea/
+.vscode/
+*.swp
+*.DS_Store
+Thumbs.db
+
+# Scratch / Temporary
+scratch/
