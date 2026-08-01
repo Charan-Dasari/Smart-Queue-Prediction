@@ -1,0 +1,98 @@
+========== New Cold Start Attempt (2026-08-01T12:08:55.7085038+00:00) ==========
+2026-08-01T12:08:55.7085038+00:00 ContainerStatus: State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:56.6608581+00:00 ContainerStatus: State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:56.9688912+00:00 ContainerStatus: Site: intelliq-api will be blocked for 2 minutes till 08/01/2026 12:10:56
+2026-08-01T12:08:56.9689862+00:00 ContainerStatus: State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site: intelliq-api will be blocked for 2 minutes till 08/01/2026 12:10:56, DetailsLevel: WARN
+2026-08-01T12:08:56.9692234+00:00 ContainerStatus: State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:08:58.4208603+00:00 ContainerStatus: State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:10:56.9724340+00:00 ContainerStatus: Site: intelliq-api is unblocked.
+2026-08-01T12:12:42.3243291+00:00 ContainerStatus: State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:12:44.6848122+00:00 ContainerStatus: State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:12:44.6849024+00:00 ContainerStatus: Container start method called.
+2026-08-01T12:12:44.6849571+00:00 ContainerStatus: State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:12:44.6850340+00:00 ContainerStatus: Establishing network.
+2026-08-01T12:12:44.6851201+00:00 ContainerStatus: Pulling image: appsvc/dotnetcore:9.0_20260504.4.tuxprod.
+2026-08-01T12:12:45.1088608+00:00 ContainerStatus: Container is starting.
+2026-08-01T12:12:45.1090043+00:00 ContainerStatus: State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Mounting volumes for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:12:45.1091117+00:00 ContainerStatus: Establishing user namespace if not established already.
+2026-08-01T12:12:45.1092264+00:00 ContainerStatus: Establishing network if not established already.
+2026-08-01T12:12:45.1093494+00:00 ContainerStatus: Mounting volumes.
+2026-08-01T12:12:45.1100321+00:00 ContainerStatus: Nested mountpoint site/wwwroot
+2026-08-01T12:12:45.1476923+00:00 ContainerStatus: Nested mountpoint volatile/logs
+2026-08-01T12:12:45.2165056+00:00 ContainerStatus: Nested mountpoint 
+2026-08-01T12:12:45.2170675+00:00 ContainerStatus: Nested mountpoint 
+2026-08-01T12:12:45.2890770+00:00 ContainerStatus: Nested mountpoint 
+2026-08-01T12:12:45.3099580+00:00 ContainerStatus: Nested mountpoint 
+2026-08-01T12:12:45.4998181+00:00 ContainerStatus: Nested mountpoint 
+2026-08-01T12:12:47.6426314+00:00 ContainerStatus: State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for intelliq-api. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-01T12:12:47.6427804+00:00 ContainerStatus: Creating container.
+2026-08-01T12:12:47.6433195+00:00 ContainerStatus: Creating pipes for streaming container io.
+2026-08-01T12:12:47.6434405+00:00 ContainerStatus: Creating stdout named pipe at /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6704328+00:00 ContainerStatus: Successfully created stdout named pipe at: /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6711692+00:00 ContainerStatus: Opening named pipe /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f for reading in non-blocking mode.
+2026-08-01T12:12:47.6719438+00:00 ContainerStatus: Successfully opened named pipe: /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6722282+00:00 ContainerStatus: Successfully removed non-blocking flag from /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6892860+00:00 ContainerStatus: Creating stderr named pipe at /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.6906700+00:00 ContainerStatus: Successfully created stderr named pipe at: /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.6910950+00:00 ContainerStatus: Opening named pipe /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10 for reading in non-blocking mode.
+2026-08-01T12:12:47.6991618+00:00 ContainerStatus: Successfully opened named pipe: /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.7004491+00:00 ContainerStatus: Successfully removed non-blocking flag from /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.7087742+00:00 ContainerStatus: Creating container with image: appsvc/dotnetcore:9.0_20260504.4.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod
+2026-08-01T12:12:48.5976873+00:00 ContainerStatus: Starting container: 3365e86811c8_intelliq-api.
+2026-08-01T12:12:48.7761353+00:00 ContainerStatus: Starting watchers and probes.
+2026-08-01T12:12:48.7938192+00:00 ContainerStatus: Starting metrics collection.
+2026-08-01T12:12:48.7943071+00:00 ContainerStatus: Container is running.
+2026-08-01T12:12:48.7944190+00:00 ContainerStatus: State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:12:49.3362967+00:00 ContainerStream:    _____                               
+2026-08-01T12:12:49.3363327+00:00 ContainerStream:   /  _  \ __________ _________   ____  
+2026-08-01T12:12:49.3363356+00:00 ContainerStream:  /  /_\  \\___   /  |  \_  __ \_/ __ \ 
+2026-08-01T12:12:49.3363377+00:00 ContainerStream: /    |    \/    /|  |  /|  | \/\  ___/ 
+2026-08-01T12:12:49.3363400+00:00 ContainerStream: \____|__  /_____ \____/ |__|    \___  >
+2026-08-01T12:12:49.3363437+00:00 ContainerStream:         \/      \/                  \/ 
+2026-08-01T12:12:49.3363459+00:00 ContainerStream: A P P   S E R V I C E   O N   L I N U X
+2026-08-01T12:12:49.3363479+00:00 ContainerStream: 
+2026-08-01T12:12:49.3363502+00:00 ContainerStream: Documentation       : http://aka.ms/webapp-linux
+2026-08-01T12:12:49.3363524+00:00 ContainerStream: Dotnet quickstart   : https://aka.ms/dotnet-qs
+2026-08-01T12:12:49.3363545+00:00 ContainerStream: ASP .NETCore Version: 9.0.15
+2026-08-01T12:12:49.3363567+00:00 ContainerStream: Instance Name       : lw1sdlwk0001E4
+2026-08-01T12:12:49.3363594+00:00 ContainerStream: Instance Id         : 182350d73622b11ccdbe6e8c1485ddc261ae27ae445eca9fe52ac50e417c829d
+2026-08-01T12:12:49.3363647+00:00 ContainerStream: 
+2026-08-01T12:12:49.3363671+00:00 ContainerStream: Note: Any data outside '/home' is not persisted
+2026-08-01T12:12:49.6259371+00:00 ContainerStatus: Container start method finished after 4940 ms.
+2026-08-01T12:12:49.6261540+00:00 ContainerStatus: State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:12:49.6261816+00:00 ContainerStatus: State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-01T12:13:00.2469615+00:00 ContainerStream: Starting OpenBSD Secure Shell server: sshd.
+2026-08-01T12:13:00.2730937+00:00 ContainerStream: WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2026-08-01T12:13:00.3784417+00:00 ContainerStream: Updating certificates in /etc/ssl/certs...
+2026-08-01T12:13:33.3838735+00:00 ContainerStream: rehash: warning: skipping duplicate certificate in azl_SSL.com_TLS_ECC_Root_CA_2022.pem
+2026-08-01T12:13:33.3947497+00:00 ContainerStream: rehash: warning: skipping duplicate certificate in azl_SSL.com_TLS_RSA_Root_CA_2022.pem
+2026-08-01T12:13:33.9159618+00:00 ContainerStream: rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2026-08-01T12:13:33.9928292+00:00 ContainerStream: 4 added, 0 removed; done.
+2026-08-01T12:13:34.0015187+00:00 ContainerStream: Running hooks in /etc/ca-certificates/update.d...
+2026-08-01T12:13:34.0390260+00:00 ContainerStream: done.
+2026-08-01T12:13:34.0760792+00:00 ContainerStream: CA certificates copied and updated successfully.
+2026-08-01T12:13:34.5328387+00:00 ContainerStream: Starting periodic command scheduler: cron.
+2026-08-01T12:13:34.5618063+00:00 ContainerStream: Running oryx create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -defaultAppFilePath /defaulthome/hostingstart/hostingstart.dll     -bindPort 8080 -bindPort2 '' -userStartupCommand '' 
+2026-08-01T12:13:35.3418136+00:00 ContainerStream: Could not find build manifest file at '/home/site/wwwroot/oryx-manifest.toml'
+2026-08-01T12:13:35.3499371+00:00 ContainerStream: Could not find operation ID in manifest. Generating an operation id...
+2026-08-01T12:13:35.3499651+00:00 ContainerStream: Build Operation ID: 862cd36b-983d-429c-b4b0-a2790ee4c3ca
+2026-08-01T12:13:36.7972450+00:00 ContainerStream: 
+2026-08-01T12:13:36.8141543+00:00 ContainerStream: Agent extension 
+2026-08-01T12:13:36.8162820+00:00 ContainerStream: Before if loop >> DotNet Runtime 
+2026-08-01T12:13:36.9381467+00:00 ContainerStream: DotNet Runtime 9.0WARNING: Expected to find only one file with extension '.runtimeconfig.json' but found 2
+2026-08-01T12:13:36.9457050+00:00 ContainerStream: WARNING: Found files: 'Smart_Queue.runtimeconfig.json, publish\Smart_Queue.runtimeconfig.json'
+2026-08-01T12:13:36.9457353+00:00 ContainerStream: WARNING: To fix this issue you can set the startup command to point to a particular startup file
+2026-08-01T12:13:36.9457386+00:00 ContainerStream:          For example: 'dotnet myapp.dll'
+2026-08-01T12:13:37.0992502+00:00 ContainerStream: Writing output script to '/opt/startup/startup.sh'
+2026-08-01T12:13:37.4251478+00:00 ContainerStream: Trying to find the startup DLL name...
+2026-08-01T12:13:37.4401053+00:00 ContainerStream: Running the default app using command: dotnet "/defaulthome/hostingstart/hostingstart.dll"
+2026-08-01T12:13:41.8414133+00:00 ContainerStream: Hosting environment: Production
+2026-08-01T12:13:41.8471906+00:00 ContainerStream: Content root path: /defaulthome/hostingstart/
+2026-08-01T12:13:41.8484546+00:00 ContainerStream: Now listening on: http://[::]:8080
+2026-08-01T12:13:41.8577376+00:00 ContainerStream: Application started. Press Ctrl+C to shut down.
+2026-08-01T12:13:42.9243176+00:00 ContainerStatus: Site startup probe succeeded after 53.2181611 seconds.
+2026-08-01T12:13:43.2901311+00:00 ContainerStatus: State: Starting, Action: WarmUpProbeSucceeded, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site startup probe succeeded after 53.2181611 seconds., DetailsLevel: INFO
+2026-08-01T12:13:44.7899909+00:00 ContainerStatus: Site is running with deployment version: c14f6162-30fe-4d66-9d47-12eeb619194a
+2026-08-01T12:13:44.7908485+00:00 ContainerStatus: Site started.
+2026-08-01T12:13:44.7912981+00:00 ContainerStatus: State: Started, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site started at 08/01/2026 12:13:44 (UTC), DetailsLevel: INFO
+2026-08-01T12:13:44.8990163+00:00 ContainerStatus: Site is running with patch version DOTNETCORE-9.0.15
