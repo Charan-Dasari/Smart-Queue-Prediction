@@ -6,13 +6,7 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 
 class ApiService {
   static String get baseUrl {
-    if (kIsWeb) {
-      final host = Uri.base.host;
-      if (host == 'localhost' || host == '127.0.0.1') {
-        return 'http://localhost:5164/api';
-      }
-      return 'https://intelliq-api.azurewebsites.net/api';
-    }
+    // Always use the live Azure API for testing since the local backend is no longer running
     return 'https://intelliq-api.azurewebsites.net/api';
   }
 
