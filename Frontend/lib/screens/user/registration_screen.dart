@@ -111,9 +111,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       context.go('/home');
     } catch (e) {
       if (!mounted) return;
+      final msg = e.toString().replaceAll('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Registration failed. Please try again. ($e)'),
+          content: Text(msg.isNotEmpty ? msg : 'Registration failed. Please try again.'),
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppTheme.errorColor,
         ),

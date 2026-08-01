@@ -47,6 +47,17 @@ class ApiService {
     return headers;
   }
 
+  static String _extractError(String body, String fallback) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        if (decoded.containsKey('message')) return decoded['message'];
+        if (decoded.containsKey('error')) return decoded['error'];
+      }
+    } catch (_) {}
+    return fallback;
+  }
+
   // ── Auth ──
   static Future<Map<String, dynamic>> login(String identifier, String password) async {
     final response = await http.post(
@@ -63,7 +74,7 @@ class ApiService {
       await setToken(data['token']);
       return data;
     } else {
-      throw Exception('Failed to login: ${response.body}');
+      throw Exception(_extractError(response.body, 'Failed to login: ${response.body}'));
     }
   }
 
@@ -92,7 +103,7 @@ class ApiService {
       await setToken(data['token']);
       return data;
     } else {
-      throw Exception('Failed to register: ${response.body}');
+      throw Exception(_extractError(response.body, 'Failed to register: ${response.body}'));
     }
   }
 
