@@ -11,10 +11,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white"/>
-  <img src="https://img.shields.io/badge/.NET_8-ASP.NET_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"/>
+  <img src="https://img.shields.io/badge/.NET_9-ASP.NET_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"/>
   <img src="https://img.shields.io/badge/Python-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
   <img src="https://img.shields.io/badge/SQL_Server-EF_Core-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white"/>
-  <img src="https://img.shields.io/badge/ML-Random_Forest-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/ML-Linear_Regression-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Azure-App_Service-0089D6?style=for-the-badge&logo=microsoftazure&logoColor=white"/>
 </p>
 
 ---
@@ -32,7 +33,7 @@
   - [Frontend Setup](#3-frontend-flutter)
 - [Test Credentials](#-test-credentials)
 - [API Overview](#-api-overview)
-- [ML Model](#-ml-model)
+- [ML Model](#-ML)
 - [Screenshots](#-screenshots)
 - [Version History](#-version-history)
 - [Contributing](#-contributing)
@@ -86,9 +87,9 @@ Users can **book digital tokens**, **track their live position** in the queue, a
 | Layer | Technology |
 |-------|-----------|
 | **Mobile App** | Flutter 3.x (Dart) — cross-platform Android/iOS |
-| **Backend API** | ASP.NET Core 8 (C#) — REST API with JWT Auth |
+| **Backend API** | ASP.NET Core 9 (C#) — REST API with JWT Auth |
 | **Database** | Microsoft SQL Server + Entity Framework Core |
-| **ML Model** | Python · scikit-learn (Random Forest) |
+| **ML Model** | Python · scikit-learn (Linear Regression) |
 | **ML Serving** | FastAPI + Uvicorn |
 | **State Management** | Flutter `provider` package |
 | **Navigation** | `go_router` (Flutter) |
@@ -104,7 +105,7 @@ This repository is organized into **4 branches** — each containing only its re
 main          ← Full project overview (this branch)
 ├── Frontend  ← Flutter mobile application
 ├── Backend   ← ASP.NET Core REST API
-└── ml-model  ← Python ML model + FastAPI prediction server
+└── ML  ← Python ML model + FastAPI prediction server
 ```
 
 ### Main branch directory layout:
@@ -140,7 +141,7 @@ Smart-Queue-Prediction/
 │       └── Program.cs           # App startup, DI, JWT config
 │
 ├── ml/                          # ML Model & Prediction API
-│   ├── train_model.py           # Train & serialize the Random Forest model
+│   ├── train_model.py           # Train & serialize the Linear Regression model
 │   ├── api.py                   # FastAPI prediction endpoint
 │   ├── api/app.py               # Extended API configuration
 │   ├── models/
@@ -172,7 +173,7 @@ Smart-Queue-Prediction/
                        │ REST API (HTTP/JSON + JWT)
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│           ASP.NET Core 8 Backend API                │
+│           ASP.NET Core 9 Backend API                │
 │                                                     │
 │  Controllers → Services → EF Core → SQL Server      │
 │                                                     │
@@ -189,7 +190,7 @@ Smart-Queue-Prediction/
 ┌─────────────────────────────────────────────────────┐
 │            FastAPI ML Prediction Server             │
 │                                                     │
-│  Random Forest model → Predicts wait time (mins)   │
+│  Linear Regression model → Predicts wait time (mins)   │
 │  Input: service_type, day, hour, queue_length, ...  │
 │  Output: { estimated_wait_time_minutes: 12.5 }      │
 └─────────────────────────────────────────────────────┘
@@ -202,7 +203,7 @@ Smart-Queue-Prediction/
 ### Prerequisites
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.x stable)
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (or SQL Server Express)
 - [Python 3.10+](https://www.python.org/downloads/)
 
@@ -225,7 +226,7 @@ Update `appsettings.json` with your SQL Server connection string:
 Run migrations and start the server:
 ```bash
 dotnet ef database update   # Creates schema + seeds initial provider data
-dotnet run                  # Starts API at http://localhost:5126
+dotnet run                  # Starts API at http://localhost:5164
 ```
 
 > ✅ The `DbSeeder.cs` will automatically populate hospitals, banks, and government offices on first run.
@@ -277,7 +278,7 @@ static const String baseUrl = 'http://10.0.2.2:5126/api';
 static const String baseUrl = 'http://192.168.x.x:5126/api';
 
 // For iOS Simulator / Web
-static const String baseUrl = 'http://localhost:5126/api';
+static const String baseUrl = 'http://localhost:5164/api';
 ```
 
 Run the app:
@@ -302,7 +303,7 @@ flutter run
 
 ## 📡 API Overview
 
-Base URL: `http://localhost:5126/api`
+Base URL: `http://localhost:5164/api` (Local) / `https://intelliq-api.azurewebsites.net/api` (Prod)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -324,7 +325,7 @@ Base URL: `http://localhost:5126/api`
 
 ## 🤖 ML Model
 
-The AI slot prediction system uses a **Random Forest Regressor** trained on queue management data to predict estimated wait times.
+The AI slot prediction system uses a **Linear Regression model** trained on queue management data to predict estimated wait times.
 
 **Features used:**
 - Service type (Hospital / Bank / Government)
@@ -400,7 +401,7 @@ A timeline of the project's growth from a concept to a fully integrated system:
 > 🗓️ Machine learning integration and analytics
 
 - [x] **ML:** Collected and cleaned queue management datasets (Banks, Hospitals, Restaurants, Colleges)
-- [x] **ML:** Trained Random Forest Regressor model for wait time prediction
+- [x] **ML:** Trained Linear Regression model for wait time prediction
 - [x] **ML:** Built FastAPI prediction server (`api.py`) serving `/predict_wait_time` endpoint
 - [x] **Backend:** `MlPredictionService.cs` — .NET service calling the Python ML API
 - [x] **Frontend:** Smart Slot screen — AI-recommended time slots with predicted wait times
@@ -410,25 +411,25 @@ A timeline of the project's growth from a concept to a fully integrated system:
 
 ---
 
-### `v1.0` — Polish, Dark Mode & Final Release *(Sprint 5)*
-> 🗓️ Production-ready release with full feature completeness
+### `v0.9` — Azure Cloud Deployment, Polish & Dark Mode *(Sprint 5)*
+> 🗓️ Production-ready release with CI/CD and full feature completeness
 
+- [x] **Cloud:** Automated CI/CD pipelines via GitHub Actions
+- [x] **Cloud:** ASP.NET Backend deployed to Azure App Service (`intelliq-api`)
+- [x] **Cloud:** FastAPI ML server deployed to Azure App Service (Linux) (`intelliq-ml`)
+- [x] **Cloud:** Flutter Frontend deployed to Azure Static Web Apps
 - [x] **Frontend:** Dark Mode / Light Mode toggle with per-user persistence
-- [x] **Frontend:** Dark mode preference saved per `userId` in `SharedPreferences` — survives logout/login
-- [x] **Frontend:** Theme resets to Light on logout, restores user's saved preference on re-login
-- [x] **Frontend:** `UserThemeWrapper` applied across all role screens (User, Staff, Admin)
-- [x] **Frontend:** About screen, Help & Support screen, Profile screen
-- [x] **Frontend:** Forgot Password flow
-- [x] **Backend:** Public tunneling support for remote device testing
-- [x] **Full:** GitHub structured into 4 branches (`main`, `Frontend`, `Backend`, `ml-model`)
-- [x] **Full:** Comprehensive README with setup guide, API reference, and test credentials
+- [x] **Frontend:** About screen, Help & Support screen, Profile screen updated
+- [x] **Frontend:** Dynamic API URL routing (Localhost vs Azure)
+- [x] **ML:** Refactored model to `Linear Regression` for faster inference
+- [x] **Full:** GitHub structured into isolated deployment branches (`main`, `Frontend`, `Backend`, `ML`)
 
 ---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch from the appropriate branch (`Frontend`, `Backend`, or `ml-model`)
+2. Create your feature branch from the appropriate branch (`Frontend`, `Backend`, or `ML`)
 3. Commit your changes with a descriptive message
 4. Push to your fork and open a Pull Request
 
