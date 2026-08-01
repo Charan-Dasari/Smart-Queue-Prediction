@@ -1,0 +1,37 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Frontend/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.0'
+        channel: 'stable'
+    
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: Frontend
+    
+    - name: Build web
+      run: flutter build web --release
+      working-directory: Frontend
+    
+    - name: Deploy to Azure Static Web Apps
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_TOKEN }}
+        action: 'upload'
+        app_location: 'Frontend/build/web'
+        skip_app_build: true

@@ -1,0 +1,336 @@
+2026-08-01T11:57:55.0547603Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-08-01T11:57:59.9907939Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-08-01T11:57:59.9909637Z Container start method called.
+2026-08-01T11:57:59.9910726Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod for intelliq-api., DetailsLevel: INFO
+2026-08-01T11:57:59.9911998Z Establishing network.
+2026-08-01T11:57:59.9913390Z Pulling image: appsvc/dotnetcore:9.0_20260504.4.tuxprod.
+2026-08-01T11:58:01.2049508Z Image appsvc/dotnetcore:9.0_20260504.4.tuxprod is pulled from registry 10.1.0.5:13209
+2026-08-01T11:58:01.2062407Z Container is starting.
+2026-08-01T11:58:01.2063981Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for intelliq-api., DetailsLevel: INFO
+2026-08-01T11:58:01.2065121Z Establishing user namespace if not established already.
+2026-08-01T11:58:01.2066335Z Establishing network if not established already.
+2026-08-01T11:58:01.2067684Z Mounting volumes.
+2026-08-01T11:58:01.2152471Z Nested mountpoint site/wwwroot
+2026-08-01T11:58:01.2438595Z Nested mountpoint volatile/logs
+2026-08-01T11:58:01.3405862Z Nested mountpoint 
+2026-08-01T11:58:01.4658935Z Nested mountpoint 
+2026-08-01T11:58:01.8939094Z Nested mountpoint 
+2026-08-01T11:58:01.9204454Z Nested mountpoint 
+2026-08-01T11:58:02.3667926Z Nested mountpoint 
+2026-08-01T11:58:05.4755349Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for intelliq-api. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-01T11:58:05.4756369Z Creating container.
+2026-08-01T11:58:05.4756981Z Creating pipes for streaming container io.
+2026-08-01T11:58:05.4757579Z Creating stdout named pipe at /podr/container/pipe/93fa4ff8a413_intelliq-api/stdout_b2637f535edd4a2e91a7f241b0517227.
+2026-08-01T11:58:05.5194707Z Successfully created stdout named pipe at: /podr/container/pipe/93fa4ff8a413_intelliq-api/stdout_b2637f535edd4a2e91a7f241b0517227.
+2026-08-01T11:58:05.5204062Z Opening named pipe /podr/container/pipe/93fa4ff8a413_intelliq-api/stdout_b2637f535edd4a2e91a7f241b0517227 for reading in non-blocking mode.
+2026-08-01T11:58:05.5208122Z Successfully opened named pipe: /podr/container/pipe/93fa4ff8a413_intelliq-api/stdout_b2637f535edd4a2e91a7f241b0517227.
+2026-08-01T11:58:05.5481827Z Successfully removed non-blocking flag from /podr/container/pipe/93fa4ff8a413_intelliq-api/stdout_b2637f535edd4a2e91a7f241b0517227.
+2026-08-01T11:58:05.5679786Z Creating stderr named pipe at /podr/container/pipe/93fa4ff8a413_intelliq-api/stderr_337d27e342b942f4ada4d03bbc2b99d6.
+2026-08-01T11:58:05.6031641Z Successfully created stderr named pipe at: /podr/container/pipe/93fa4ff8a413_intelliq-api/stderr_337d27e342b942f4ada4d03bbc2b99d6.
+2026-08-01T11:58:05.6032804Z Opening named pipe /podr/container/pipe/93fa4ff8a413_intelliq-api/stderr_337d27e342b942f4ada4d03bbc2b99d6 for reading in non-blocking mode.
+2026-08-01T11:58:05.6033817Z Successfully opened named pipe: /podr/container/pipe/93fa4ff8a413_intelliq-api/stderr_337d27e342b942f4ada4d03bbc2b99d6.
+2026-08-01T11:58:05.6034482Z Successfully removed non-blocking flag from /podr/container/pipe/93fa4ff8a413_intelliq-api/stderr_337d27e342b942f4ada4d03bbc2b99d6.
+2026-08-01T11:58:05.6433144Z Creating container with image: appsvc/dotnetcore:9.0_20260504.4.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod
+2026-08-01T11:58:07.3018182Z Container get mounts received unexpected exception.
+2026-08-01T11:58:07.3994716Z Container get processes received unexpected exception.
+2026-08-01T11:58:10.2674320Z Starting container: 93fa4ff8a413_intelliq-api.
+2026-08-01T11:58:10.5332462Z Starting watchers and probes.
+2026-08-01T11:58:10.5382114Z Starting metrics collection.
+2026-08-01T11:58:10.5388845Z Container is running.
+2026-08-01T11:58:10.5392158Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T11:58:10.8557935Z Container start method finished after 10864 ms.
+2026-08-01T11:58:10.9250237Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T11:58:10.9251138Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-01T12:00:00.3663989Z Container has finished running with exit code: 134.
+2026-08-01T12:00:00.3832720Z Container is terminating. Grace period: 5 seconds.
+2026-08-01T12:00:00.4333543Z Stop and delete container. Retry count = 0
+2026-08-01T12:00:00.4399079Z Stopping container: 93fa4ff8a413_intelliq-api.
+2026-08-01T12:00:01.2773643Z Deleting container: 93fa4ff8a413_intelliq-api. Retry count = 0
+2026-08-01T12:00:03.0202255Z Container spec TerminationMessagePolicy  path 
+2026-08-01T12:00:03.0218093Z Container is terminated. Total time elapsed: 2636 ms.
+2026-08-01T12:00:03.0397432Z Site container: intelliq-api terminated during site startup.
+2026-08-01T12:00:03.2322104Z State: Stopping, Action: CancellingStartup, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:00:03.5317367Z Site startup probe failed after 112.4461243 seconds.
+2026-08-01T12:00:04.9986359Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:00:05.1986426Z Failed to start site. Revert by stopping site.
+2026-08-01T12:00:05.2046549Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:00:05.2829196Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:00:05.2830877Z Site: intelliq-api stopped.
+2026-08-01T12:00:05.3385025Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:00:07.4833207Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:00:08.6889820Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:00:08 (UTC), DetailsLevel: ERR
+2026-08-01T12:00:10.6788077Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:00:08 (UTC), DetailsLevel: ERR
+2026-08-01T12:00:17.8101629Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:00:08 (UTC), DetailsLevel: ERR
+2026-08-01T12:00:23.2992025Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:00:08 (UTC), DetailsLevel: ERR
+2026-08-01T12:00:23.2992997Z Container start method called.
+2026-08-01T12:00:23.2993631Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:00:23.2994245Z Establishing network.
+2026-08-01T12:00:23.2995023Z Pulling image: appsvc/dotnetcore:9.0_20260504.4.tuxprod.
+2026-08-01T12:00:24.0024715Z Container is starting.
+2026-08-01T12:00:24.0027850Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Mounting volumes for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:00:24.0035980Z Establishing user namespace if not established already.
+2026-08-01T12:00:24.0037177Z Establishing network if not established already.
+2026-08-01T12:00:24.0041469Z Mounting volumes.
+2026-08-01T12:00:24.0134689Z Nested mountpoint site/wwwroot
+2026-08-01T12:00:24.0366678Z Nested mountpoint volatile/logs
+2026-08-01T12:00:24.1491225Z Nested mountpoint 
+2026-08-01T12:00:24.1586148Z Nested mountpoint 
+2026-08-01T12:00:24.3465300Z Nested mountpoint 
+2026-08-01T12:00:24.3581824Z Nested mountpoint 
+2026-08-01T12:00:24.6108442Z Nested mountpoint 
+2026-08-01T12:00:26.2179562Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for intelliq-api. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-01T12:00:26.2180655Z Creating container.
+2026-08-01T12:00:26.2181273Z Creating pipes for streaming container io.
+2026-08-01T12:00:26.2181796Z Creating stdout named pipe at /podr/container/pipe/9844827b9399_intelliq-api/stdout_1a2a7f4a9920437aba91d84411d9e9af.
+2026-08-01T12:00:26.2183969Z Successfully created stdout named pipe at: /podr/container/pipe/9844827b9399_intelliq-api/stdout_1a2a7f4a9920437aba91d84411d9e9af.
+2026-08-01T12:00:26.2184513Z Opening named pipe /podr/container/pipe/9844827b9399_intelliq-api/stdout_1a2a7f4a9920437aba91d84411d9e9af for reading in non-blocking mode.
+2026-08-01T12:00:26.2185279Z Successfully opened named pipe: /podr/container/pipe/9844827b9399_intelliq-api/stdout_1a2a7f4a9920437aba91d84411d9e9af.
+2026-08-01T12:00:26.2185855Z Successfully removed non-blocking flag from /podr/container/pipe/9844827b9399_intelliq-api/stdout_1a2a7f4a9920437aba91d84411d9e9af.
+2026-08-01T12:00:26.2541585Z Creating stderr named pipe at /podr/container/pipe/9844827b9399_intelliq-api/stderr_e58129488b304451b9ea7fb5a9d9a7ba.
+2026-08-01T12:00:26.2543708Z Successfully created stderr named pipe at: /podr/container/pipe/9844827b9399_intelliq-api/stderr_e58129488b304451b9ea7fb5a9d9a7ba.
+2026-08-01T12:00:26.2544310Z Opening named pipe /podr/container/pipe/9844827b9399_intelliq-api/stderr_e58129488b304451b9ea7fb5a9d9a7ba for reading in non-blocking mode.
+2026-08-01T12:00:26.2545052Z Successfully opened named pipe: /podr/container/pipe/9844827b9399_intelliq-api/stderr_e58129488b304451b9ea7fb5a9d9a7ba.
+2026-08-01T12:00:26.2545656Z Successfully removed non-blocking flag from /podr/container/pipe/9844827b9399_intelliq-api/stderr_e58129488b304451b9ea7fb5a9d9a7ba.
+2026-08-01T12:00:26.2546606Z Creating container with image: appsvc/dotnetcore:9.0_20260504.4.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod
+2026-08-01T12:00:27.8531097Z Starting container: 9844827b9399_intelliq-api.
+2026-08-01T12:00:28.0842204Z Starting watchers and probes.
+2026-08-01T12:00:28.0848240Z Starting metrics collection.
+2026-08-01T12:00:28.0970327Z Container is running.
+2026-08-01T12:00:28.1025912Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:00:28.5026477Z Container start method finished after 5203 ms.
+2026-08-01T12:00:28.5028375Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:00:28.5028674Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-01T12:03:22.1785117Z Container has finished running with exit code: 134.
+2026-08-01T12:03:22.1792657Z Container is terminating. Grace period: 5 seconds.
+2026-08-01T12:03:22.1982068Z Stop and delete container. Retry count = 0
+2026-08-01T12:03:22.1989431Z Stopping container: 9844827b9399_intelliq-api.
+2026-08-01T12:03:22.3398390Z Deleting container: 9844827b9399_intelliq-api. Retry count = 0
+2026-08-01T12:03:22.9596530Z Container spec TerminationMessagePolicy  path 
+2026-08-01T12:03:22.9605731Z Container is terminated. Total time elapsed: 781 ms.
+2026-08-01T12:03:22.9782243Z Site container: intelliq-api terminated during site startup.
+2026-08-01T12:03:22.9903724Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:00:04, LastErrorDetails: Container exited with exit code 134 during startup after 112.5s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:03:23.0852977Z Site startup probe failed after 174.571307 seconds.
+2026-08-01T12:03:23.4343449Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:03:23.4624249Z Failed to start site. Revert by stopping site.
+2026-08-01T12:03:23.4718341Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:03:23.4797442Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:03:23.4810236Z Site: intelliq-api stopped.
+2026-08-01T12:03:23.4828327Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:03:24.1822324Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:03:24.5669151Z Site: intelliq-api will be blocked for 1 minutes till 08/01/2026 12:04:24
+2026-08-01T12:03:24.5837590Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site: intelliq-api will be blocked for 1 minutes till 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:24.6638551Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:03:24 (UTC), DetailsLevel: WARN
+2026-08-01T12:03:25.4466235Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:03:24 (UTC), DetailsLevel: WARN
+2026-08-01T12:03:31.6491359Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:31.6491746Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:03:36.9976286Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:36.9978493Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:03:42.3225659Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:42.3229069Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:03:47.5506953Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:47.5507818Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:03:52.7385655Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:52.7387169Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:03:58.1330570Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:03:58.1331043Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:04:03.5907554Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:04:03.5907943Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:04:09.0114228Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:04:09.0114622Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:04:14.3403101Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:04:14.3403466Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:04:19.6841246Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:04:19.6841582Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:04:24.5659103Z Site: intelliq-api is unblocked.
+2026-08-01T12:04:25.0268252Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:04:27.8302478Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:04:24, DetailsLevel: WARN
+2026-08-01T12:04:27.8303604Z Container start method called.
+2026-08-01T12:04:27.8304072Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:04:27.8304645Z Establishing network.
+2026-08-01T12:04:27.8305625Z Pulling image: appsvc/dotnetcore:9.0_20260504.4.tuxprod.
+2026-08-01T12:04:28.6577214Z Container is starting.
+2026-08-01T12:04:28.6578408Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Mounting volumes for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:04:28.6579387Z Establishing user namespace if not established already.
+2026-08-01T12:04:28.6580999Z Establishing network if not established already.
+2026-08-01T12:04:28.6581998Z Mounting volumes.
+2026-08-01T12:04:28.7040842Z Nested mountpoint site/wwwroot
+2026-08-01T12:04:28.7619817Z Nested mountpoint volatile/logs
+2026-08-01T12:04:28.8937719Z Nested mountpoint 
+2026-08-01T12:04:28.9513355Z Nested mountpoint 
+2026-08-01T12:04:29.5428123Z Nested mountpoint 
+2026-08-01T12:04:29.5435675Z Nested mountpoint 
+2026-08-01T12:04:29.8114716Z Nested mountpoint 
+2026-08-01T12:04:31.8951754Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for intelliq-api. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-01T12:04:31.8953616Z Creating container.
+2026-08-01T12:04:31.8954453Z Creating pipes for streaming container io.
+2026-08-01T12:04:31.8955189Z Creating stdout named pipe at /podr/container/pipe/86f9d3b97446_intelliq-api/stdout_687b475be67343bc98d881b504e9fd0e.
+2026-08-01T12:04:31.9138676Z Successfully created stdout named pipe at: /podr/container/pipe/86f9d3b97446_intelliq-api/stdout_687b475be67343bc98d881b504e9fd0e.
+2026-08-01T12:04:31.9140451Z Opening named pipe /podr/container/pipe/86f9d3b97446_intelliq-api/stdout_687b475be67343bc98d881b504e9fd0e for reading in non-blocking mode.
+2026-08-01T12:04:31.9499790Z Successfully opened named pipe: /podr/container/pipe/86f9d3b97446_intelliq-api/stdout_687b475be67343bc98d881b504e9fd0e.
+2026-08-01T12:04:31.9501299Z Successfully removed non-blocking flag from /podr/container/pipe/86f9d3b97446_intelliq-api/stdout_687b475be67343bc98d881b504e9fd0e.
+2026-08-01T12:04:31.9861465Z Creating stderr named pipe at /podr/container/pipe/86f9d3b97446_intelliq-api/stderr_238c6eec9f304738b7e5dab42f85b13c.
+2026-08-01T12:04:31.9931020Z Successfully created stderr named pipe at: /podr/container/pipe/86f9d3b97446_intelliq-api/stderr_238c6eec9f304738b7e5dab42f85b13c.
+2026-08-01T12:04:31.9937483Z Opening named pipe /podr/container/pipe/86f9d3b97446_intelliq-api/stderr_238c6eec9f304738b7e5dab42f85b13c for reading in non-blocking mode.
+2026-08-01T12:04:31.9939258Z Successfully opened named pipe: /podr/container/pipe/86f9d3b97446_intelliq-api/stderr_238c6eec9f304738b7e5dab42f85b13c.
+2026-08-01T12:04:32.0116065Z Successfully removed non-blocking flag from /podr/container/pipe/86f9d3b97446_intelliq-api/stderr_238c6eec9f304738b7e5dab42f85b13c.
+2026-08-01T12:04:32.0143399Z Creating container with image: appsvc/dotnetcore:9.0_20260504.4.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod
+2026-08-01T12:04:34.3281931Z Starting container: 86f9d3b97446_intelliq-api.
+2026-08-01T12:04:34.5003819Z Starting watchers and probes.
+2026-08-01T12:04:34.5023014Z Starting metrics collection.
+2026-08-01T12:04:34.5028360Z Container is running.
+2026-08-01T12:04:34.5029418Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:04:35.2663397Z Container start method finished after 7435 ms.
+2026-08-01T12:04:35.3149774Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:04:35.3150454Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-01T12:06:09.6877122Z Container has finished running with exit code: 134.
+2026-08-01T12:06:09.6980110Z Container is terminating. Grace period: 5 seconds.
+2026-08-01T12:06:09.8013699Z Stop and delete container. Retry count = 0
+2026-08-01T12:06:09.8014672Z Stopping container: 86f9d3b97446_intelliq-api.
+2026-08-01T12:06:10.4326193Z Deleting container: 86f9d3b97446_intelliq-api. Retry count = 0
+2026-08-01T12:06:11.7668350Z Container spec TerminationMessagePolicy  path 
+2026-08-01T12:06:11.7676369Z Container is terminated. Total time elapsed: 2068 ms.
+2026-08-01T12:06:11.7678843Z Site container: intelliq-api terminated during site startup.
+2026-08-01T12:06:11.7699597Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:03:23, LastErrorDetails: Container exited with exit code 134 during startup after 174.9s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:06:11.8619663Z Site startup probe failed after 96.5087401 seconds.
+2026-08-01T12:06:13.0418399Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:06:13.0910630Z Failed to start site. Revert by stopping site.
+2026-08-01T12:06:13.0912362Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:06:13.1460376Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:06:13.1461581Z Site: intelliq-api stopped.
+2026-08-01T12:06:13.1842424Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:06:14.5918545Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:06:15.8441921Z Site: intelliq-api will be blocked for 1 minutes till 08/01/2026 12:07:15
+2026-08-01T12:06:15.8443786Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site: intelliq-api will be blocked for 1 minutes till 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:15.9472305Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:06:15 (UTC), DetailsLevel: WARN
+2026-08-01T12:06:16.8328622Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:06:15 (UTC), DetailsLevel: WARN
+2026-08-01T12:06:22.0260645Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:22.0261103Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:27.2271093Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:27.2271402Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:32.5409203Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:32.5409543Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:37.8830276Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:37.8844243Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:43.3365148Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:43.3366540Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:48.5212915Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:48.5214585Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:53.7764172Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:53.7764874Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:06:58.9724362Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:06:58.9725157Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:07:04.2793287Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:07:04.2793620Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:07:09.5641783Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:07:09.5642112Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:07:14.8914598Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:07:14.8915418Z Start site prohibitted because the site is being blocked.
+2026-08-01T12:07:15.8589406Z Site: intelliq-api is unblocked.
+2026-08-01T12:07:16.8053984Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:07:20.6542256Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/01/2026 12:07:15, DetailsLevel: WARN
+2026-08-01T12:07:20.6543105Z Container start method called.
+2026-08-01T12:07:20.6543587Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:07:20.6544237Z Establishing network.
+2026-08-01T12:07:20.6545013Z Pulling image: appsvc/dotnetcore:9.0_20260504.4.tuxprod.
+2026-08-01T12:07:21.8252448Z Container is starting.
+2026-08-01T12:07:21.8253657Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Mounting volumes for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:07:21.8254375Z Establishing user namespace if not established already.
+2026-08-01T12:07:21.8254938Z Establishing network if not established already.
+2026-08-01T12:07:21.8265276Z Mounting volumes.
+2026-08-01T12:07:21.8266960Z Nested mountpoint site/wwwroot
+2026-08-01T12:07:21.8917173Z Nested mountpoint volatile/logs
+2026-08-01T12:07:22.0062643Z Nested mountpoint 
+2026-08-01T12:07:22.0068267Z Nested mountpoint 
+2026-08-01T12:07:22.0923067Z Nested mountpoint 
+2026-08-01T12:07:22.1210953Z Nested mountpoint 
+2026-08-01T12:07:22.4227752Z Nested mountpoint 
+2026-08-01T12:07:25.0735380Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for intelliq-api. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-01T12:07:25.0737189Z Creating container.
+2026-08-01T12:07:25.0737918Z Creating pipes for streaming container io.
+2026-08-01T12:07:25.0738496Z Creating stdout named pipe at /podr/container/pipe/b6776e56cc98_intelliq-api/stdout_4308ae9a61154b20a71925c89a152c8e.
+2026-08-01T12:07:25.1088004Z Successfully created stdout named pipe at: /podr/container/pipe/b6776e56cc98_intelliq-api/stdout_4308ae9a61154b20a71925c89a152c8e.
+2026-08-01T12:07:25.1089050Z Opening named pipe /podr/container/pipe/b6776e56cc98_intelliq-api/stdout_4308ae9a61154b20a71925c89a152c8e for reading in non-blocking mode.
+2026-08-01T12:07:25.1089820Z Successfully opened named pipe: /podr/container/pipe/b6776e56cc98_intelliq-api/stdout_4308ae9a61154b20a71925c89a152c8e.
+2026-08-01T12:07:25.1090661Z Successfully removed non-blocking flag from /podr/container/pipe/b6776e56cc98_intelliq-api/stdout_4308ae9a61154b20a71925c89a152c8e.
+2026-08-01T12:07:25.1092085Z Creating stderr named pipe at /podr/container/pipe/b6776e56cc98_intelliq-api/stderr_d5e61953ade449adafd2eda717844371.
+2026-08-01T12:07:25.1093113Z Successfully created stderr named pipe at: /podr/container/pipe/b6776e56cc98_intelliq-api/stderr_d5e61953ade449adafd2eda717844371.
+2026-08-01T12:07:25.1093656Z Opening named pipe /podr/container/pipe/b6776e56cc98_intelliq-api/stderr_d5e61953ade449adafd2eda717844371 for reading in non-blocking mode.
+2026-08-01T12:07:25.1094386Z Successfully opened named pipe: /podr/container/pipe/b6776e56cc98_intelliq-api/stderr_d5e61953ade449adafd2eda717844371.
+2026-08-01T12:07:25.1094879Z Successfully removed non-blocking flag from /podr/container/pipe/b6776e56cc98_intelliq-api/stderr_d5e61953ade449adafd2eda717844371.
+2026-08-01T12:07:25.1110641Z Creating container with image: appsvc/dotnetcore:9.0_20260504.4.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod
+2026-08-01T12:07:27.7783065Z Starting container: b6776e56cc98_intelliq-api.
+2026-08-01T12:07:28.0277002Z Starting watchers and probes.
+2026-08-01T12:07:28.0280394Z Starting metrics collection.
+2026-08-01T12:07:28.0285204Z Container is running.
+2026-08-01T12:07:28.0305679Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:07:28.4261558Z Container start method finished after 7771 ms.
+2026-08-01T12:07:28.4263279Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:07:28.4263554Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-01T12:08:54.4942870Z Container has finished running with exit code: 134.
+2026-08-01T12:08:54.4948338Z Container is terminating. Grace period: 5 seconds.
+2026-08-01T12:08:54.5484153Z Stop and delete container. Retry count = 0
+2026-08-01T12:08:54.5488307Z Stopping container: b6776e56cc98_intelliq-api.
+2026-08-01T12:08:54.7624123Z Deleting container: b6776e56cc98_intelliq-api. Retry count = 0
+2026-08-01T12:08:55.2079626Z Container spec TerminationMessagePolicy  path 
+2026-08-01T12:08:55.2111729Z Container is terminated. Total time elapsed: 716 ms.
+2026-08-01T12:08:55.2112660Z Site container: intelliq-api terminated during site startup.
+2026-08-01T12:08:55.2555784Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:06:12, LastErrorDetails: Container exited with exit code 134 during startup after 97.3s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:55.2859346Z Site startup probe failed after 86.8468541 seconds.
+2026-08-01T12:08:55.6238838Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:55.6647523Z Failed to start site. Revert by stopping site.
+2026-08-01T12:08:55.6720303Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:55.6727153Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:55.6727436Z Site: intelliq-api stopped.
+2026-08-01T12:08:55.7085038Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:56.6608581Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site container: intelliq-api terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-01T12:08:56.9688912Z Site: intelliq-api will be blocked for 2 minutes till 08/01/2026 12:10:56
+2026-08-01T12:08:56.9689862Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site: intelliq-api will be blocked for 2 minutes till 08/01/2026 12:10:56, DetailsLevel: WARN
+2026-08-01T12:08:56.9692234Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:08:58.4208603Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:10:56.9724340Z Site: intelliq-api is unblocked.
+2026-08-01T12:12:42.3243291Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:12:44.6848122Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site stopped at 08/01/2026 12:08:56 (UTC), DetailsLevel: WARN
+2026-08-01T12:12:44.6849024Z Container start method called.
+2026-08-01T12:12:44.6849571Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:12:44.6850340Z Establishing network.
+2026-08-01T12:12:44.6851201Z Pulling image: appsvc/dotnetcore:9.0_20260504.4.tuxprod.
+2026-08-01T12:12:45.1088608Z Container is starting.
+2026-08-01T12:12:45.1090043Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Mounting volumes for intelliq-api., DetailsLevel: INFO
+2026-08-01T12:12:45.1091117Z Establishing user namespace if not established already.
+2026-08-01T12:12:45.1092264Z Establishing network if not established already.
+2026-08-01T12:12:45.1093494Z Mounting volumes.
+2026-08-01T12:12:45.1100321Z Nested mountpoint site/wwwroot
+2026-08-01T12:12:45.1476923Z Nested mountpoint volatile/logs
+2026-08-01T12:12:45.2165056Z Nested mountpoint 
+2026-08-01T12:12:45.2170675Z Nested mountpoint 
+2026-08-01T12:12:45.2890770Z Nested mountpoint 
+2026-08-01T12:12:45.3099580Z Nested mountpoint 
+2026-08-01T12:12:45.4998181Z Nested mountpoint 
+2026-08-01T12:12:47.6426314Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for intelliq-api. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-01T12:12:47.6427804Z Creating container.
+2026-08-01T12:12:47.6433195Z Creating pipes for streaming container io.
+2026-08-01T12:12:47.6434405Z Creating stdout named pipe at /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6704328Z Successfully created stdout named pipe at: /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6711692Z Opening named pipe /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f for reading in non-blocking mode.
+2026-08-01T12:12:47.6719438Z Successfully opened named pipe: /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6722282Z Successfully removed non-blocking flag from /podr/container/pipe/3365e86811c8_intelliq-api/stdout_ac6d901947ea4dacaa7cf617cea87f5f.
+2026-08-01T12:12:47.6892860Z Creating stderr named pipe at /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.6906700Z Successfully created stderr named pipe at: /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.6910950Z Opening named pipe /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10 for reading in non-blocking mode.
+2026-08-01T12:12:47.6991618Z Successfully opened named pipe: /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.7004491Z Successfully removed non-blocking flag from /podr/container/pipe/3365e86811c8_intelliq-api/stderr_19d39d02faf54ae69147a58a0dd6de10.
+2026-08-01T12:12:47.7087742Z Creating container with image: appsvc/dotnetcore:9.0_20260504.4.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:9.0_20260504.4.tuxprod
+2026-08-01T12:12:48.5976873Z Starting container: 3365e86811c8_intelliq-api.
+2026-08-01T12:12:48.7761353Z Starting watchers and probes.
+2026-08-01T12:12:48.7938192Z Starting metrics collection.
+2026-08-01T12:12:48.7943071Z Container is running.
+2026-08-01T12:12:48.7944190Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:12:49.6259371Z Container start method finished after 4940 ms.
+2026-08-01T12:12:49.6261540Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Container intelliq-api successfully created and is running., DetailsLevel: INFO
+2026-08-01T12:12:49.6261816Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-01T12:13:42.9243176Z Site startup probe succeeded after 53.2181611 seconds.
+2026-08-01T12:13:43.2901311Z State: Starting, Action: WarmUpProbeSucceeded, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site startup probe succeeded after 53.2181611 seconds., DetailsLevel: INFO
+2026-08-01T12:13:44.7899909Z Site is running with deployment version: c14f6162-30fe-4d66-9d47-12eeb619194a
+2026-08-01T12:13:44.7908485Z Site started.
+2026-08-01T12:13:44.7912981Z State: Started, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/01/2026 12:08:55, LastErrorDetails: Container exited with exit code 134 during startup after 87.2s. Please inspect your container logs for more details., Details: Site started at 08/01/2026 12:13:44 (UTC), DetailsLevel: INFO
+2026-08-01T12:13:44.8990163Z Site is running with patch version DOTNETCORE-9.0.15
