@@ -634,4 +634,67 @@ class ApiService {
       throw Exception('Failed to update role: ${response.body}');
     }
   }
+
+  // ── Account Management ──
+  static Future<List<dynamic>> getAllUsers() async {
+    final response = await http.get(Uri.parse('$baseUrl/account/users'), headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load users');
+    }
+  }
+
+  static Future<void> deleteUserAccount(String userId) async {
+    final response = await http.delete(Uri.parse('$baseUrl/account/$userId'), headers: _headers);
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Failed to delete user'));
+    }
+  }
+
+  static Future<Map<String, dynamic>> approveDeletion(String userId, int days) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/account/approve-deletion/$userId?days=$days'),
+      headers: _headers,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception(_extractError(response.body, 'Failed to approve deletion'));
+    }
+  }
+
+  static Future<Map<String, dynamic>> requestAccountDeletion({String? reason}) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/account/request-deletion'),
+      headers: _headers,
+      body: jsonEncode({'reason': reason}),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception(_extractError(response.body, 'Failed to request deletion'));
+    }
+  }
+
+  static Future<Map<String, dynamic>> revokeAccountDeletion() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/account/revoke-deletion'),
+      headers: _headers,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception(_extractError(response.body, 'Failed to revoke deletion'));
+    }
+  }
+
+  static Future<Map<String, dynamic>> getDeletionStatus() async {
+    final response = await http.get(Uri.parse('$baseUrl/account/deletion-status'), headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to get deletion status');
+    }
+  }
 }

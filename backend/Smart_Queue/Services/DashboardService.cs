@@ -143,6 +143,7 @@ public class DashboardService
     {
         var providers = await _db.ServiceProviders.ToListAsync();
         var totalUsers = await _db.Users.CountAsync();
+        var pendingDeletions = await _db.AccountDeletionRequests.CountAsync(d => d.Status == DeletionStatus.Pending);
 
         // Get admin email for each provider
         var adminEmails = await _db.Users
@@ -159,6 +160,7 @@ public class DashboardService
             CollegeCount = providers.Count(p => p.Category == ServiceCategory.College),
             RestaurantCount = providers.Count(p => p.Category == ServiceCategory.Restaurant),
             TotalUsers = totalUsers,
+            PendingDeletionRequests = pendingDeletions,
             Providers = providers.Select(p => new ProviderDto
             {
                 Id = p.Id,

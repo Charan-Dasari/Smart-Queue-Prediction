@@ -298,6 +298,7 @@ public class SuperAdminDashboardDto
     public int CollegeCount { get; set; }
     public int RestaurantCount { get; set; }
     public int TotalUsers { get; set; }
+    public int PendingDeletionRequests { get; set; }
     public List<ProviderDto> Providers { get; set; } = new();
 }
 

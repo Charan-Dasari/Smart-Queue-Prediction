@@ -35,6 +35,7 @@ import '../screens/staff/staff_queue_screen.dart';
 
 // Super Admin screens
 import '../screens/super_admin/super_admin_dashboard_screen.dart';
+import '../screens/super_admin/user_management_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -188,6 +189,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/super/dashboard',
       builder: (context, state) => const SuperAdminDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/super/users',
+      builder: (context, state) => const UserManagementScreen(),
     ),
   ],
 );

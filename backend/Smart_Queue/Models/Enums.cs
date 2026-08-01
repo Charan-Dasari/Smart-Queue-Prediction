@@ -52,3 +52,11 @@ public enum QueueTimelineStep
     Serving,
     Completed
 }
+
+public enum DeletionStatus
+{
+    Pending,
+    Approved,
+    Revoked,
+    Completed
+}

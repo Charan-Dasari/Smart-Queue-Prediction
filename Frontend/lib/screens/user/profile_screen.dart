@@ -23,11 +23,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _cancelledCount = 0;
   bool _isLoadingStats = true;
 
+  // Deletion status
+  bool _hasDeletionRequest = false;
+  String _deletionStatus = '';
+  DateTime? _scheduledDeletionDate;
+
   @override
   void initState() {
     super.initState();
     _darkMode = AppTheme.themeNotifier.value == ThemeMode.dark;
     _loadStats();
+    _loadDeletionStatus();
+  }
+
+  Future<void> _loadDeletionStatus() async {
+    try {
+      final data = await ApiService.getDeletionStatus();
+      if (mounted) {
+        setState(() {
+          _hasDeletionRequest = data['hasPendingRequest'] == true;
+          if (_hasDeletionRequest && data['request'] != null) {
+            _deletionStatus = data['request']['status'] ?? '';
+            final scheduled = data['request']['scheduledDeletionDate'];
+            _scheduledDeletionDate = scheduled != null ? DateTime.tryParse(scheduled) : null;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _requestDeletion() async {
+    final reasonController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Your Account?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('This will send a deletion request to the administrator. You can provide an optional reason below.'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              maxLines: 2,
+              decoration: const InputDecoration(hintText: 'Reason (optional)', prefixIcon: Icon(Icons.notes_rounded, size: 20)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
+            child: const Text('Request Deletion'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ApiService.requestAccountDeletion(reason: reasonController.text.trim().isEmpty ? null : reasonController.text.trim());
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Deletion request submitted. An admin will review it.'), backgroundColor: AppTheme.warningColor, behavior: SnackBarBehavior.floating),
+          );
+          _loadDeletionStatus();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppTheme.errorColor, behavior: SnackBarBehavior.floating),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _revokeDeletion() async {
+    try {
+      await ApiService.revokeAccountDeletion();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Deletion request revoked. Your account is safe!'), backgroundColor: AppTheme.successColor, behavior: SnackBarBehavior.floating),
+        );
+        setState(() {
+          _hasDeletionRequest = false;
+          _deletionStatus = '';
+          _scheduledDeletionDate = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppTheme.errorColor, behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
   }
 
   Future<void> _loadStats() async {
@@ -226,6 +319,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // ── Deletion Countdown Card ──
+                  if (_hasDeletionRequest && _deletionStatus == 'Approved' && _scheduledDeletionDate != null) ...[{
+                    final remaining = _scheduledDeletionDate!.difference(DateTime.now().toUtc());
+                    final totalHours = remaining.inHours;
+                    final days = remaining.inDays;
+                    final hours = totalHours - (days * 24);
+
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppTheme.errorColor.withOpacity(0.12), AppTheme.errorColor.withOpacity(0.04)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.errorColor.withOpacity(0.4)),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.timer_off_rounded, color: AppTheme.errorColor, size: 32),
+                          const SizedBox(height: 8),
+                          const Text('Account Deletion Scheduled', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppTheme.errorColor)),
+                          const SizedBox(height: 4),
+                          Text(
+                            remaining.isNegative ? 'Deletion imminent' : '$days day${days == 1 ? '' : 's'}, $hours hour${hours == 1 ? '' : 's'} remaining',
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.errorColor),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text('Changed your mind? You can keep your account.', style: TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _revokeDeletion,
+                              icon: const Icon(Icons.shield_rounded, size: 18),
+                              label: const Text('Keep My Account', style: TextStyle(fontWeight: FontWeight.w700)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.successColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }()],
+
+                  if (_hasDeletionRequest && _deletionStatus == 'Pending') ...[{
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.warningColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.warningColor.withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.hourglass_top_rounded, color: AppTheme.warningColor, size: 28),
+                          const SizedBox(height: 8),
+                          const Text('Deletion Request Pending', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.warningColor)),
+                          const SizedBox(height: 4),
+                          const Text('Your request is awaiting admin review.', style: TextStyle(fontSize: 12, color: AppTheme.textMutedColor)),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: _revokeDeletion,
+                              icon: const Icon(Icons.undo_rounded, size: 18),
+                              label: const Text('Cancel Request', style: TextStyle(fontWeight: FontWeight.w600)),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: AppTheme.warningColor),
+                                foregroundColor: AppTheme.warningColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }()],
+
+                  if (_hasDeletionRequest) const SizedBox(height: 20),
+
                   // ── Support ──
                   _buildSectionLabel('Support'),
                   const SizedBox(height: 10),
@@ -247,6 +424,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
+
+                  // ── Delete Account ──
+                  if (!_hasDeletionRequest)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.getBorderColor(context)),
+                      ),
+                      child: _buildMenuItem(
+                        Icons.delete_outline_rounded,
+                        'Delete My Account',
+                        'Request permanent account deletion',
+                        _requestDeletion,
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.errorColor),
+                      ),
+                    ),
                   const SizedBox(height: 24),
 
                   // ── Logout Action Card ──

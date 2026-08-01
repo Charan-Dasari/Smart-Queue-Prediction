@@ -231,6 +231,40 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+
+              // ── User Management Button ──
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push('/super/users'),
+                  icon: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.people_alt_rounded, size: 22),
+                      if ((data['pendingDeletionRequests'] ?? 0) > 0)
+                        Positioned(
+                          right: -6,
+                          top: -6,
+                          child: Container(
+                            width: 16,
+                            height: 16,
+                            decoration: const BoxDecoration(color: AppTheme.errorColor, shape: BoxShape.circle),
+                            child: Center(child: Text('${data['pendingDeletionRequests']}', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white))),
+                          ),
+                        ),
+                    ],
+                  ),
+                  label: const Text('User Management', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF2A2645) : const Color(0xFFE8E5F0),
+                    foregroundColor: AppTheme.primaryColor,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
               const SizedBox(height: 28),
 
               // ── Active Client List ──

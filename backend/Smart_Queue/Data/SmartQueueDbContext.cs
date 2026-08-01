@@ -19,6 +19,7 @@ public class SmartQueueDbContext : DbContext
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
     public DbSet<Place> Places => Set<Place>();
     public DbSet<ClaimRequest> ClaimRequests => Set<ClaimRequest>();
+    public DbSet<AccountDeletionRequest> AccountDeletionRequests => Set<AccountDeletionRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -159,6 +160,17 @@ public class SmartQueueDbContext : DbContext
              .WithMany()
              .HasForeignKey(a => a.UserId)
              .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── AccountDeletionRequest ──
+        modelBuilder.Entity<AccountDeletionRequest>(e =>
+        {
+            e.Property(d => d.Status).HasConversion<string>().HasMaxLength(20);
+
+            e.HasOne(d => d.User)
+             .WithMany()
+             .HasForeignKey(d => d.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
