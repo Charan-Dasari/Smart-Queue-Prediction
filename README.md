@@ -165,36 +165,7 @@ Smart-Queue-Prediction/
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│                 Flutter Mobile App                  │
-│   (User / Staff / Admin / Super Admin screens)      │
-└──────────────────────┬──────────────────────────────┘
-                       │ REST API (HTTP/JSON + JWT)
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│           ASP.NET Core 9 Backend API                │
-│                                                     │
-│  Controllers → Services → EF Core → SQL Server      │
-│                                                     │
-│  Key Controllers:                                   │
-│  • AuthController   (Login, Register, JWT)          │
-│  • QueueController  (Tokens, live queue ops)        │
-│  • AppointmentsController                           │
-│  • ServicesController / CountersController          │
-│  • StaffController / RolesController                │
-│  • DashboardController (Analytics)                  │
-└──────────────────────┬──────────────────────────────┘
-                       │ HTTP POST /predict_wait_time
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│            FastAPI ML Prediction Server             │
-│                                                     │
-│  Linear Regression model → Predicts wait time (mins)   │
-│  Input: service_type, day, hour, queue_length, ...  │
-│  Output: { estimated_wait_time_minutes: 12.5 }      │
-└─────────────────────────────────────────────────────┘
-```
+![System Architecture](doc/diagrams/system-architecture.png)
 
 ---
 
@@ -344,12 +315,6 @@ The AI slot prediction system uses a **Linear Regression model** trained on queu
 
 ---
 
-## 📸 Screenshots
-
-> App screenshots and demo videos available in the `doc/` directory.
-
----
-
 ## 📈 Version History
 
 A timeline of the project's growth from a concept to a fully integrated system:
@@ -441,6 +406,20 @@ This project was developed as part of an academic capstone project. All rights r
 
 ---
 
-<p align="center">
-  Built with ❤️ by the IntelliQ Team
-</p>
+<div align="center">
+  <h3>Built with ❤️ by the IntelliQ Team</h3>
+  <br/>
+  <table>
+    <tr>
+      <td align="center">
+        <b>Devicharan Dasari</b><br>Backend Manager
+      </td>
+      <td align="center">
+        <b>Adityraj Chuadasama</b><br>Frontend Manager
+      </td>
+      <td align="center">
+        <b>Smit Rudakiya</b><br>AI & ML Model Manager
+      </td>
+    </tr>
+  </table>
+</div>

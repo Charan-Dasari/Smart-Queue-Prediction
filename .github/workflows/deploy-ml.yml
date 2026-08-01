@@ -2,7 +2,7 @@ name: Deploy ML API
 
 on:
   push:
-    branches: [ml-model]
+    branches: [main]
     paths:
       - 'ml/**'
   workflow_dispatch:
