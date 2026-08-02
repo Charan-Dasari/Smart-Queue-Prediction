@@ -320,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 20),
 
                   // ── Deletion Countdown Card ──
-                  if (_hasDeletionRequest && _deletionStatus == 'Approved' && _scheduledDeletionDate != null) ...[{
+                  if (_hasDeletionRequest && _deletionStatus == 'Approved' && _scheduledDeletionDate != null) ...[(() {
                     final remaining = _scheduledDeletionDate!.difference(DateTime.now().toUtc());
                     final totalHours = remaining.inHours;
                     final days = remaining.inDays;
@@ -364,9 +364,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     );
-                  }()],
+                  })()],
 
-                  if (_hasDeletionRequest && _deletionStatus == 'Pending') ...[{
+                  if (_hasDeletionRequest && _deletionStatus == 'Pending') ...[(() {
                     return Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -399,7 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     );
-                  }()],
+                  })()],
 
                   if (_hasDeletionRequest) const SizedBox(height: 20),
 
