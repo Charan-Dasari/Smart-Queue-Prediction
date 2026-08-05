@@ -47,8 +47,8 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
       _selectedCategory = widget.initialCategory!;
     }
     _scrollController.addListener(_onScroll);
-    // Fire both in parallel instead of sequential
-    Future.wait([_fetchStates(), _fetchPlaces()]);
+    _fetchStates();
+    _fetchPlaces();
   }
 
   @override

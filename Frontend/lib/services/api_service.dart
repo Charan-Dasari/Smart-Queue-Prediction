@@ -433,10 +433,10 @@ class ApiService {
       String errorMsg = response.body;
       try {
         final errJson = jsonDecode(response.body);
-        if (errJson['message'] != null) {
-          errorMsg = errJson['message'];
+        if (errJson is Map && errJson['message'] != null) {
+          errorMsg = errJson['message'].toString();
           if (errJson['details'] != null) {
-            errorMsg += ' (${errJson['details']})';
+            errorMsg += ' (${errJson['details'].toString()})';
           }
         }
       } catch (e) {
