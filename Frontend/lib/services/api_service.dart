@@ -256,6 +256,7 @@ class ApiService {
     }
   }
 
+
   // ── Services ──
   static Future<List<dynamic>> getProviderServices(String providerId) async {
     final response = await http.get(Uri.parse('$baseUrl/providers/$providerId/services'), headers: _headers);
