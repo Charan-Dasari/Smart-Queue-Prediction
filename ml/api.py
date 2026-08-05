@@ -9,7 +9,7 @@ import os
 app = FastAPI(title="Smart Queue ML Prediction API")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "models", "linear_model.pkl")
+MODEL_PATH = os.path.join(BASE_DIR, "models", "random_forest_model.pkl")
 METADATA_PATH = os.path.join(BASE_DIR, "models", "metadata.pkl")
 
 model = None

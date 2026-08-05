@@ -5,7 +5,7 @@ import joblib
 
 app = FastAPI(title="Smart Queue Prediction API")
 
-model = joblib.load("../models/linear_regression.pkl")
+model = joblib.load("../models/random_forest_model.pkl")
 scaler = joblib.load("../models/scaler.pkl")
 encoders = joblib.load("../models/label_encoders.pkl")
 
