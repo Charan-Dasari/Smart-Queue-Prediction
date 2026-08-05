@@ -256,6 +256,16 @@ class ApiService {
     }
   }
 
+  static Future<void> cancelAppointment(String id) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/appointments/$id/cancel'),
+      headers: _headers,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to cancel appointment');
+    }
+  }
+
   // ── Services ──
   static Future<List<dynamic>> getProviderServices(String providerId) async {
     final response = await http.get(Uri.parse('$baseUrl/providers/$providerId/services'), headers: _headers);
