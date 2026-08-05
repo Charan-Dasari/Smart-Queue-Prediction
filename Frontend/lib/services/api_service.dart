@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart'; // for kIsWeb
@@ -317,14 +317,6 @@ class ApiService {
     }
   }
   
-  static Future<List<dynamic>> getTimeSlots(String serviceId, String date) async {
-    final response = await http.get(Uri.parse('$baseUrl/services/services/$serviceId/timeslots?date=$date'), headers: _headers);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load timeslots');
-    }
-  }
 
   // ── Staff ──
   static Future<List<dynamic>> getProviderStaff() async {
