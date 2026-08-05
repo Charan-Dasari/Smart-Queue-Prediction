@@ -67,15 +67,18 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
   Future<void> _loadData() async {
     try {
-      final statsData = await ApiService.getUserDashboard();
-      final tokenData = await ApiService.getMyActiveTokens();
-      final notifData = await ApiService.getNotifications();
+      // Fire all 3 API calls in PARALLEL instead of waiting for each one sequentially
+      final results = await Future.wait([
+        ApiService.getUserDashboard(),
+        ApiService.getMyActiveTokens(),
+        ApiService.getNotifications(),
+      ]);
 
       if (mounted) {
         setState(() {
-          _stats = DashboardStats.fromJson(statsData);
-          _activeTokens = tokenData.map((t) => QueueToken.fromJson(t as Map<String, dynamic>)).toList();
-          _notifications = notifData
+          _stats = DashboardStats.fromJson(results[0] as Map<String, dynamic>);
+          _activeTokens = (results[1] as List<dynamic>).map((t) => QueueToken.fromJson(t as Map<String, dynamic>)).toList();
+          _notifications = (results[2] as List<dynamic>)
               .map((n) => AppNotification.fromJson(n as Map<String, dynamic>))
               .toList();
           _isLoading = false;

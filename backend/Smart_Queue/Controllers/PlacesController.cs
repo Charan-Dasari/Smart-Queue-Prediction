@@ -33,6 +33,14 @@ public class PlacesController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50)
     {
+        // Build a cache key from all the query parameters
+        var cacheKey = $"places_{category}_{state}_{city}_{q}_{page}_{pageSize}";
+
+        if (_cache.TryGetValue(cacheKey, out object? cachedResult))
+        {
+            return Ok(cachedResult!);
+        }
+
         var query = _db.Places.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrEmpty(category) && category != "All")
@@ -41,21 +49,20 @@ public class PlacesController : ControllerBase
         if (!string.IsNullOrEmpty(q))
             query = query.Where(p => p.Name.Contains(q) || p.City.Contains(q) || p.State.Contains(q));
 
-        var dbPlaces = await query.ToListAsync();
-
+        // Push state/city filtering into SQL instead of loading all rows into memory
         if (!string.IsNullOrEmpty(state))
-            dbPlaces = dbPlaces.Where(p => CleanAndTitleCase(p.State) == state).ToList();
+            query = query.Where(p => p.State.ToLower().Contains(state.ToLower()));
 
         if (!string.IsNullOrEmpty(city))
-            dbPlaces = dbPlaces.Where(p => CleanAndTitleCase(p.City) == city).ToList();
+            query = query.Where(p => p.City.ToLower().Contains(city.ToLower()));
 
-        var totalCount = dbPlaces.Count;
+        var totalCount = await query.CountAsync();
 
-        var paginatedPlaces = dbPlaces
+        var paginatedPlaces = await query
             .OrderBy(p => p.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync();
 
         var places = paginatedPlaces.Select(p => new PlaceDto
         {
@@ -68,13 +75,18 @@ public class PlacesController : ControllerBase
             Rating = p.Rating,
         }).ToList();
 
-        return Ok(new
+        var result = new
         {
             totalCount,
             page,
             pageSize,
             places,
-        });
+        };
+
+        // Cache for 5 minutes
+        _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+
+        return Ok(result);
     }
 
     /// <summary>
