@@ -215,6 +215,21 @@ class ApiService {
     }
   }
 
+  static Future<List<dynamic>> getTimeSlots(String providerId, String serviceId, DateTime date) async {
+    // Format date as yyyy-MM-dd
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final response = await http.get(
+      Uri.parse('$baseUrl/providers/$providerId/services/$serviceId/timeslots?date=$dateStr'),
+      headers: _headers
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to get time slots');
+    }
+  }
+
   // ── Queues ──
   static Future<Map<String, dynamic>> joinQueue(String providerId, String serviceId) async {
     final response = await http.post(

@@ -116,6 +116,14 @@ public class QueueService
         // Update counter
         counter.ActiveTokenId = nextToken.Id;
 
+        // Update related appointment
+        var appointment = await _db.Appointments
+            .Where(a => a.TokenNumber == nextToken.TokenNumber && a.ProviderId == nextToken.ProviderId)
+            .OrderByDescending(a => a.CreatedAt)
+            .FirstOrDefaultAsync();
+        if (appointment != null)
+            appointment.Status = AppointmentStatus.Serving;
+
         // Log activity
         _db.ActivityLogs.Add(new ActivityLog
         {
@@ -174,7 +182,9 @@ public class QueueService
 
         // Update related appointment
         var appointment = await _db.Appointments
-            .FirstOrDefaultAsync(a => a.TokenNumber == token.TokenNumber && a.ProviderId == token.ProviderId);
+            .Where(a => a.TokenNumber == token.TokenNumber && a.ProviderId == token.ProviderId)
+            .OrderByDescending(a => a.CreatedAt)
+            .FirstOrDefaultAsync();
         if (appointment != null)
             appointment.Status = AppointmentStatus.Completed;
 
@@ -207,6 +217,14 @@ public class QueueService
 
         if (counter != null)
             counter.ActiveTokenId = null;
+
+        // Update related appointment
+        var appointment = await _db.Appointments
+            .Where(a => a.TokenNumber == token.TokenNumber && a.ProviderId == token.ProviderId)
+            .OrderByDescending(a => a.CreatedAt)
+            .FirstOrDefaultAsync();
+        if (appointment != null)
+            appointment.Status = AppointmentStatus.Cancelled;
 
         // Log activity
         _db.ActivityLogs.Add(new ActivityLog

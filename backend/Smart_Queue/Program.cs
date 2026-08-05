@@ -51,6 +51,9 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<ProviderService>();
 
+// Register Background Services
+builder.Services.AddHostedService<AppointmentCleanupService>();
+
 // Register ML Prediction Service with HttpClient
 builder.Services.AddHttpClient<MlPredictionService>(client =>
 {

@@ -18,7 +18,8 @@ public class MlPredictionService
         int queueLength,
         string serviceType,
         string priorityLevel,
-        int activeStaffCount)
+        int activeStaffCount,
+        int? hourOfDay = null)
     {
         try
         {
@@ -27,7 +28,7 @@ public class MlPredictionService
                 features = new Dictionary<string, object>
                 {
                     { "queue_length", queueLength },
-                    { "hour_of_day", DateTime.Now.Hour },
+                    { "hour_of_day", hourOfDay ?? DateTime.Now.Hour },
                     { "active_staff_count", activeStaffCount },
                     { "service_type", serviceType.ToLower() },
                     { "priority_level", priorityLevel.ToLower() }

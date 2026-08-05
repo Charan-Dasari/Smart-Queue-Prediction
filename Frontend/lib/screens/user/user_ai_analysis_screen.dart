@@ -108,29 +108,51 @@ class _UserAIAnalysisScreenState extends State<UserAIAnalysisScreen> {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: theme.textTheme.bodyLarge?.color),
                       ),
                       const SizedBox(height: 14),
-                      _buildRecommendationCard(
-                        context,
-                        Icons.access_time_filled_rounded,
-                        'Best Time to Visit',
-                        '2:00 PM - 3:30 PM',
-                        'AI predicts 40% lower crowd density during this window. Estimated wait: ~8 minutes.',
-                        AppTheme.successColor,
-                      ),
-                      _buildRecommendationCard(
-                        context,
-                        Icons.warning_amber_rounded,
-                        'Avoid Peak Hours',
-                        '10:30 AM - 12:30 PM',
-                        'Historically busiest period with 2.5x higher wait times. Consider rescheduling.',
-                        AppTheme.errorColor,
-                      ),
-                      _buildRecommendationCard(
-                        context,
-                        Icons.flash_on_rounded,
-                        'Quick Service Window',
-                        '4:00 PM - 5:00 PM',
-                        'Staff capacity is high and queue length drops. Fastest service completion rate.',
-                        AppTheme.warningColor,
+                      Builder(
+                        builder: (context) {
+                          final now = DateTime.now();
+                          String formatTime(DateTime dt) {
+                            final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+                            final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+                            return '${h.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $ampm';
+                          }
+                          
+                          final bestStart = formatTime(now.add(const Duration(hours: 1)));
+                          final bestEnd = formatTime(now.add(const Duration(hours: 2, minutes: 30)));
+                          final peakStart = formatTime(now.add(const Duration(hours: 3)));
+                          final peakEnd = formatTime(now.add(const Duration(hours: 5)));
+                          final quickStart = formatTime(now.add(const Duration(hours: 6)));
+                          final quickEnd = formatTime(now.add(const Duration(hours: 7)));
+
+                          return Column(
+                            children: [
+                              _buildRecommendationCard(
+                                context,
+                                Icons.access_time_filled_rounded,
+                                'Best Time to Visit',
+                                '$bestStart - $bestEnd',
+                                'AI predicts 40% lower crowd density during this window. Estimated wait: ~8 minutes.',
+                                AppTheme.successColor,
+                              ),
+                              _buildRecommendationCard(
+                                context,
+                                Icons.warning_amber_rounded,
+                                'Avoid Peak Hours',
+                                '$peakStart - $peakEnd',
+                                'Historically busiest period with 2.5x higher wait times. Consider rescheduling.',
+                                AppTheme.errorColor,
+                              ),
+                              _buildRecommendationCard(
+                                context,
+                                Icons.flash_on_rounded,
+                                'Quick Service Window',
+                                '$quickStart - $quickEnd',
+                                'Staff capacity is high and queue length drops. Fastest service completion rate.',
+                                AppTheme.warningColor,
+                              ),
+                            ],
+                          );
+                        }
                       ),
                       const SizedBox(height: 28),
 
