@@ -430,7 +430,19 @@ class ApiService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to book appointment: ${response.body}');
+      String errorMsg = response.body;
+      try {
+        final errJson = jsonDecode(response.body);
+        if (errJson['message'] != null) {
+          errorMsg = errJson['message'];
+          if (errJson['details'] != null) {
+            errorMsg += ' (${errJson['details']})';
+          }
+        }
+      } catch (e) {
+        // Not JSON
+      }
+      throw Exception(errorMsg);
     }
   }
 

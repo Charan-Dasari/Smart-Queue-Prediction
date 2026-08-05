@@ -74,7 +74,10 @@ public class ProvidersController : ControllerBase
         int startHour = provider.Category == ServiceCategory.Restaurant ? 11 : 9;
         int endHour = provider.Category == ServiceCategory.Restaurant ? 22 : 18;
         
-        var now = DateTime.UtcNow; // Assuming UTC for backend, though could be local depending on setup
+        // Use India Standard Time (IST)
+        var istZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+        var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istZone);
+        
         // Get all appointments for this provider, service, and specific date
         var appointmentsForDate = await _db.Appointments
             .Where(a => a.ProviderId == id && a.ServiceId == serviceId && a.Date.Date == requestedDate.Date)

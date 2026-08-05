@@ -564,6 +564,16 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                   child: CircularProgressIndicator(),
                 ),
               )
+            else if (_timeSlots.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Text(
+                    'No time slots available for this date.',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                ),
+              )
             else
               GridView.builder(
                 shrinkWrap: true,

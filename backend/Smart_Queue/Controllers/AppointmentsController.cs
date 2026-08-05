@@ -95,60 +95,73 @@ public class AppointmentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Book([FromBody] BookAppointmentRequest request)
     {
-        var userId = GetUserId();
-
-        // Validate time slot
-        TimeSlot? timeSlot = null;
-        if (request.TimeSlotId.HasValue)
+        try
         {
-            timeSlot = await _db.TimeSlots.FindAsync(request.TimeSlotId.Value);
-            if (timeSlot == null || timeSlot.AvailableSlots <= 0)
-                return BadRequest(new { message = "Selected time slot is not available" });
+            var userId = GetUserId();
+
+            // Validate time slot
+            TimeSlot? timeSlot = null;
+            if (request.TimeSlotId.HasValue)
+            {
+                timeSlot = await _db.TimeSlots.FindAsync(request.TimeSlotId.Value);
+                if (timeSlot == null || timeSlot.AvailableSlots <= 0)
+                    return BadRequest(new { message = "Selected time slot is not available" });
+            }
+
+            // Create queue token
+            var queueToken = await _queueService.CreateTokenAsync(userId, request.ProviderId, request.ServiceId);
+
+            // Create appointment
+            var appointment = new Appointment
+            {
+                TokenNumber = queueToken.TokenNumber,
+                Date = request.Date,
+                Status = AppointmentStatus.Upcoming,
+                UserId = userId,
+                ProviderId = request.ProviderId,
+                ServiceId = request.ServiceId,
+                TimeSlotId = request.TimeSlotId,
+            };
+
+            _db.Appointments.Add(appointment);
+
+            // Decrease available slots
+            if (timeSlot != null)
+            {
+                timeSlot.AvailableSlots--;
+            }
+
+            await _db.SaveChangesAsync();
+
+            // Send notification
+            var provider = await _db.ServiceProviders.FindAsync(request.ProviderId);
+            var service = await _db.Services.FindAsync(request.ServiceId);
+            await _notificationService.CreateBookingNotificationAsync(
+                userId, provider?.Name ?? "", service?.Name ?? "", queueToken.TokenNumber);
+
+            return Ok(new AppointmentDto
+            {
+                Id = appointment.Id,
+                TokenNumber = appointment.TokenNumber,
+                ProviderName = provider?.Name ?? "",
+                ServiceName = service?.Name ?? "",
+                Date = appointment.Date,
+                Status = appointment.Status,
+                ProviderId = appointment.ProviderId,
+                ServiceId = appointment.ServiceId,
+                CreatedAt = appointment.CreatedAt,
+                TimeSlot = timeSlot != null ? new TimeSlotDto
+                {
+                    Id = timeSlot.Id,
+                    StartTime = timeSlot.StartTime,
+                    EndTime = timeSlot.EndTime
+                } : null
+            });
         }
-
-        // Create queue token
-        var queueToken = await _queueService.CreateTokenAsync(userId, request.ProviderId, request.ServiceId);
-
-        // Create appointment
-        var appointment = new Appointment
+        catch (Exception ex)
         {
-            TokenNumber = queueToken.TokenNumber,
-            Date = request.Date,
-            Status = AppointmentStatus.Upcoming,
-            UserId = userId,
-            ProviderId = request.ProviderId,
-            ServiceId = request.ServiceId,
-            TimeSlotId = request.TimeSlotId,
-        };
-
-        _db.Appointments.Add(appointment);
-
-        // Decrease available slots
-        if (timeSlot != null)
-        {
-            timeSlot.AvailableSlots--;
+            return StatusCode(500, new { message = $"Failed to book: {ex.Message}", details = ex.InnerException?.Message });
         }
-
-        await _db.SaveChangesAsync();
-
-        // Send notification
-        var provider = await _db.ServiceProviders.FindAsync(request.ProviderId);
-        var service = await _db.Services.FindAsync(request.ServiceId);
-        await _notificationService.CreateBookingNotificationAsync(
-            userId, provider?.Name ?? "", service?.Name ?? "", queueToken.TokenNumber);
-
-        return Ok(new AppointmentDto
-        {
-            Id = appointment.Id,
-            TokenNumber = appointment.TokenNumber,
-            ProviderName = provider?.Name ?? "",
-            ServiceName = service?.Name ?? "",
-            Date = appointment.Date,
-            Status = appointment.Status,
-            ProviderId = appointment.ProviderId,
-            ServiceId = appointment.ServiceId,
-            CreatedAt = appointment.CreatedAt,
-        });
     }
 
     [HttpGet("{id}")]
