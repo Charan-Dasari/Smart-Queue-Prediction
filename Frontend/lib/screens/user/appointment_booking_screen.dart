@@ -63,14 +63,19 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
             });
           }
 
-          final availableIndices = [];
+          final availableIndices = <int>[];
           for (int i = 0; i < _timeSlots.length; i++) {
             if (_timeSlots[i]['available'] == true) {
               availableIndices.add(i);
             }
           }
           if (availableIndices.isNotEmpty) {
-            availableIndices.shuffle();
+            // ML-Driven Recommendation: Pick the slot with the lowest crowd/wait time!
+            availableIndices.sort((a, b) {
+              double crowdA = _timeSlots[a]['crowd'] as double;
+              double crowdB = _timeSlots[b]['crowd'] as double;
+              return crowdA.compareTo(crowdB);
+            });
             _aiRecommendedSlotIndex = availableIndices.first;
           }
           _isFetchingSlots = false;

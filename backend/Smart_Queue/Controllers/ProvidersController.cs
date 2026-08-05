@@ -103,12 +103,6 @@ public class ProvidersController : ControllerBase
                 int bookedCount = appointmentsForDate.Count(a => a.Date.Hour == hour && a.Date.Minute == min);
                 bool isFull = bookedCount >= maxCapacityPerSlot;
 
-                // For restaurant mock breaks
-                if (provider.Category == ServiceCategory.Restaurant && (hour == 15 || hour == 20)) 
-                    isFull = true;
-                if (provider.Category != ServiceCategory.Restaurant && (hour == 12 || hour == 14)) 
-                    isFull = true;
-
                 // Call ML API
                 int predictedWaitMins = await _mlPredictionService.PredictWaitTimeAsync(
                     queueLength: bookedCount,
