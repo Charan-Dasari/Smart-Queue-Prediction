@@ -42,7 +42,6 @@
 - [Test Credentials](#-test-credentials)
 - [API Overview](#-api-overview)
 - [ML Model](#-ml-model)
-- [Screenshots](#-screenshots)
 - [Version History](#-version-history)
 - [Contributing](#-contributing)
 
