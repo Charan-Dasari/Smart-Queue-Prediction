@@ -140,7 +140,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppTheme.getBorderColor(context)),
                 ),
@@ -202,7 +202,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppTheme.getBorderColor(context)),
                 ),
@@ -213,7 +213,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen>
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.getTextColor(context)),
                     ),
                     const SizedBox(height: 16),
-                    // Generated QR Code
+                    // Generated QR Code — QR always needs white background for scanning
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
