@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart'; // for kIsWeb
@@ -215,6 +215,21 @@ class ApiService {
     }
   }
 
+  static Future<List<dynamic>> getTimeSlots(String providerId, String serviceId, DateTime date) async {
+    // Format date as yyyy-MM-dd
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final response = await http.get(
+      Uri.parse('$baseUrl/providers/$providerId/services/$serviceId/timeslots?date=$dateStr'),
+      headers: _headers
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to get time slots');
+    }
+  }
+
   // ── Queues ──
   static Future<Map<String, dynamic>> joinQueue(String providerId, String serviceId) async {
     final response = await http.post(
@@ -240,6 +255,7 @@ class ApiService {
       throw Exception('Failed to load active tokens');
     }
   }
+
 
   // ── Services ──
   static Future<List<dynamic>> getProviderServices(String providerId) async {
@@ -302,14 +318,6 @@ class ApiService {
     }
   }
   
-  static Future<List<dynamic>> getTimeSlots(String serviceId, String date) async {
-    final response = await http.get(Uri.parse('$baseUrl/services/services/$serviceId/timeslots?date=$date'), headers: _headers);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load timeslots');
-    }
-  }
 
   // ── Staff ──
   static Future<List<dynamic>> getProviderStaff() async {
@@ -413,7 +421,19 @@ class ApiService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to book appointment: ${response.body}');
+      String errorMsg = response.body;
+      try {
+        final errJson = jsonDecode(response.body);
+        if (errJson is Map && errJson['message'] != null) {
+          errorMsg = errJson['message'].toString();
+          if (errJson['details'] != null) {
+            errorMsg += ' (${errJson['details'].toString()})';
+          }
+        }
+      } catch (e) {
+        // Not JSON
+      }
+      throw Exception(errorMsg);
     }
   }
 

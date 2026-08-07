@@ -996,7 +996,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     );
   }
 
-  // ── Quick Shortcuts Grid ──
   Widget _buildQuickShortcutsGrid(BuildContext context, bool isNarrow) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1015,6 +1014,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             Expanded(child: _buildShortcutTile(context, Icons.calendar_month_rounded, 'Book Slot', 'Schedule Visit', AppTheme.primaryColor, () => context.push('/services'), isNarrow)),
             SizedBox(width: isNarrow ? 8 : 12),
             Expanded(child: _buildShortcutTile(context, Icons.qr_code_2_rounded, 'Digital Token', 'QR Pass', AppTheme.accentColor, () => context.push('/my-tokens'), isNarrow)),
+          ],
+        ),
+        SizedBox(height: isNarrow ? 8 : 12),
+        Row(
+          children: [
+            Expanded(child: _buildShortcutTile(context, Icons.auto_awesome, 'AI Analysis', 'Smart Insights', AppTheme.aiAccent, () => context.push('/ai-analysis'), isNarrow)),
+            SizedBox(width: isNarrow ? 8 : 12),
+            Expanded(child: _buildShortcutTile(context, Icons.bar_chart_rounded, 'Statistics', 'Visit Analytics', AppTheme.successColor, () => context.push('/statistics'), isNarrow)),
           ],
         ),
       ],

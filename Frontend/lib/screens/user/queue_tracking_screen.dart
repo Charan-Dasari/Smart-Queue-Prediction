@@ -65,6 +65,51 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen>
     }
   }
 
+  Future<void> _cancelAppointment() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Appointment'),
+        content: const Text('Are you sure you want to cancel this appointment? This action cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No, Keep It')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), 
+            child: const Text('Yes, Cancel', style: TextStyle(color: AppTheme.errorColor)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      try {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(child: CircularProgressIndicator()),
+        );
+
+        await ApiService.cancelAppointment(widget.tokenId);
+        
+        if (mounted) {
+          Navigator.pop(context);
+          _loadData();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Appointment cancelled successfully.')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to cancel: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _refreshTimer?.cancel();
@@ -306,6 +351,26 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen>
                   ),
                 ),
               const SizedBox(height: 32),
+
+              // ── Cancel Appointment Button ──
+              if (_token!.status == AppointmentStatus.upcoming || _token!.status == AppointmentStatus.inQueue)
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: OutlinedButton(
+                    onPressed: _cancelAppointment,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.errorColor,
+                      side: const BorderSide(color: AppTheme.errorColor),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Text(
+                      'Cancel Appointment',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

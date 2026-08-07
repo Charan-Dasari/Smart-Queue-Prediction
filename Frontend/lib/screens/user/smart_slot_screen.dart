@@ -10,24 +10,32 @@ class SmartSlotScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final now = DateTime.now();
+    
+    String formatTime(DateTime dt) {
+      final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+      final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      return '${h.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $ampm';
+    }
+
     final recommendations = [
-      {'time': '02:00 PM', 'wait': 8, 'score': 0.95, 'label': 'Best Choice'},
-      {'time': '02:30 PM', 'wait': 12, 'score': 0.88, 'label': 'Great Option'},
-      {'time': '09:00 AM', 'wait': 10, 'score': 0.82, 'label': 'Good Slot'},
+      {'time': formatTime(now.add(const Duration(hours: 1))), 'wait': 8, 'score': 0.95, 'label': 'Best Choice'},
+      {'time': formatTime(now.add(const Duration(hours: 2, minutes: 30))), 'wait': 12, 'score': 0.88, 'label': 'Great Option'},
+      {'time': formatTime(now.add(const Duration(hours: 4))), 'wait': 10, 'score': 0.82, 'label': 'Good Slot'},
     ];
 
     final allSlots = [
-      {'time': '09:00 AM', 'crowd': 0.2, 'wait': 10},
-      {'time': '09:30 AM', 'crowd': 0.3, 'wait': 12},
-      {'time': '10:00 AM', 'crowd': 0.6, 'wait': 22},
-      {'time': '10:30 AM', 'crowd': 0.8, 'wait': 35},
-      {'time': '11:00 AM', 'crowd': 0.9, 'wait': 45},
-      {'time': '11:30 AM', 'crowd': 0.7, 'wait': 30},
-      {'time': '02:00 PM', 'crowd': 0.2, 'wait': 8},
-      {'time': '02:30 PM', 'crowd': 0.3, 'wait': 12},
-      {'time': '03:00 PM', 'crowd': 0.5, 'wait': 20},
-      {'time': '03:30 PM', 'crowd': 0.6, 'wait': 25},
-      {'time': '04:00 PM', 'crowd': 0.7, 'wait': 30},
+      {'time': formatTime(now.add(const Duration(hours: 0, minutes: 30))), 'crowd': 0.2, 'wait': 10},
+      {'time': formatTime(now.add(const Duration(hours: 1, minutes: 00))), 'crowd': 0.3, 'wait': 12},
+      {'time': formatTime(now.add(const Duration(hours: 1, minutes: 30))), 'crowd': 0.6, 'wait': 22},
+      {'time': formatTime(now.add(const Duration(hours: 2, minutes: 00))), 'crowd': 0.8, 'wait': 35},
+      {'time': formatTime(now.add(const Duration(hours: 2, minutes: 30))), 'crowd': 0.9, 'wait': 45},
+      {'time': formatTime(now.add(const Duration(hours: 3, minutes: 00))), 'crowd': 0.7, 'wait': 30},
+      {'time': formatTime(now.add(const Duration(hours: 3, minutes: 30))), 'crowd': 0.2, 'wait': 8},
+      {'time': formatTime(now.add(const Duration(hours: 4, minutes: 00))), 'crowd': 0.3, 'wait': 12},
+      {'time': formatTime(now.add(const Duration(hours: 4, minutes: 30))), 'crowd': 0.5, 'wait': 20},
+      {'time': formatTime(now.add(const Duration(hours: 5, minutes: 00))), 'crowd': 0.6, 'wait': 25},
+      {'time': formatTime(now.add(const Duration(hours: 5, minutes: 30))), 'crowd': 0.7, 'wait': 30},
     ];
 
     return UserThemeWrapper(
@@ -115,7 +123,7 @@ class SmartSlotScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Based on historical arrival rates and live queue velocity, visiting at 2:00 PM will minimize your estimated wait time to under 8 minutes.',
+                      "Based on historical arrival rates and live queue velocity, visiting at ${recommendations[0]['time']} will minimize your estimated wait time to under ${recommendations[0]['wait']} minutes.",
                       style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.9), height: 1.4),
                     ),
                   ],

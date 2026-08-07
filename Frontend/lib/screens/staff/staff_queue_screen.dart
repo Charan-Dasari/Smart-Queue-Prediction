@@ -162,7 +162,7 @@ class _StaffQueueScreenState extends State<StaffQueueScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppTheme.getTextColor(context),
+              color: isSelected ? Colors.white : Colors.black,
             ),
           ),
         ),

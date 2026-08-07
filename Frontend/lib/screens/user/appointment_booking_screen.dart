@@ -22,6 +22,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   
   ServiceProviderInfo? _provider;
   bool _isLoading = true;
+  bool _isFetchingSlots = true;
   bool _notOnboarded = false;
   String _error = '';
 
@@ -33,48 +34,62 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     _fetchProviderDetails();
   }
 
-  void _generateMockTimeSlots() {
-    _timeSlots.clear();
-    bool isRestaurant = _provider?.category == ServiceCategory.restaurant;
-    int startHour = isRestaurant ? 12 : 9;
-    int endHour = isRestaurant ? 22 : 18;
+  Future<void> _fetchTimeSlots() async {
+    if (_selectedServiceId == null) return;
+    
+    setState(() {
+      _isFetchingSlots = true;
+      _timeSlots.clear();
+      _selectedSlotIndex = -1;
+      _aiRecommendedSlotIndex = -1;
+    });
 
-    for (int hour = startHour; hour <= endHour; hour++) {
-      for (int min = 0; min < 60; min += 30) {
-        if (hour == endHour && min > 0) continue;
-        final h = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-        final ampm = hour >= 12 ? 'PM' : 'AM';
-        final timeStr = '${h.toString().padLeft(2, '0')}:${min.toString().padLeft(2, '0')} $ampm';
-        
-        // Mock unavailability
-        bool available = true;
-        if (isRestaurant && (hour == 15 || hour == 20)) available = false;
-        if (!isRestaurant && (hour == 12 || hour == 14)) available = false;
+    try {
+      final slotsData = await ApiService.getTimeSlots(
+        widget.providerId, 
+        _selectedServiceId!, 
+        _selectedDate
+      );
+      
+      if (mounted) {
+        setState(() {
+          _timeSlots.clear();
+          for (var slot in slotsData) {
+            _timeSlots.add({
+              'time': slot['time'],
+              'available': slot['available'],
+              'crowd': slot['crowdLevel'],
+              'wait': slot['waitTime']
+            });
+          }
 
-        final now = DateTime.now();
-        if (_selectedDate.year == now.year && _selectedDate.month == now.month && _selectedDate.day == now.day) {
-            if (hour < now.hour || (hour == now.hour && min <= now.minute)) {
-                available = false;
+          final availableIndices = <int>[];
+          for (int i = 0; i < _timeSlots.length; i++) {
+            if (_timeSlots[i]['available'] == true) {
+              availableIndices.add(i);
             }
-        }
-
-        _timeSlots.add({
-          'time': timeStr,
-          'available': available,
-          'crowd': 0.2 + ((hour * min) % 4) * 0.15,
+          }
+          if (availableIndices.isNotEmpty) {
+            // ML-Driven Recommendation: Pick the slot with the lowest crowd/wait time!
+            availableIndices.sort((a, b) {
+              double crowdA = _timeSlots[a]['crowd'] as double;
+              double crowdB = _timeSlots[b]['crowd'] as double;
+              return crowdA.compareTo(crowdB);
+            });
+            _aiRecommendedSlotIndex = availableIndices.first;
+          }
+          _isFetchingSlots = false;
         });
       }
-    }
-
-    final availableIndices = [];
-    for (int i = 0; i < _timeSlots.length; i++) {
-      if (_timeSlots[i]['available'] == true) {
-        availableIndices.add(i);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isFetchingSlots = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load time slots: $e')),
+        );
       }
-    }
-    if (availableIndices.isNotEmpty) {
-      availableIndices.shuffle();
-      _aiRecommendedSlotIndex = availableIndices.first;
     }
   }
 
@@ -95,11 +110,12 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
             _provider!.services.retainWhere((s) => activeServiceNames.contains(s.name.toLowerCase()));
           }
           
-          _generateMockTimeSlots();
-
           if (_provider!.services.isNotEmpty) {
             _selectedServiceId = _provider!.services.first.id;
           }
+          
+          _fetchTimeSlots();
+
           _isLoading = false;
         });
       }
@@ -139,11 +155,26 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
+      final timeStr = _timeSlots[_selectedSlotIndex]['time'] as String;
+      int hour = int.parse(timeStr.split(':')[0]);
+      int minute = int.parse(timeStr.split(':')[1].substring(0, 2));
+      bool isPM = timeStr.contains('PM');
+      if (isPM && hour != 12) hour += 12;
+      if (!isPM && hour == 12) hour = 0;
+      
+      final appointmentDate = DateTime(
+        _selectedDate.year, 
+        _selectedDate.month, 
+        _selectedDate.day, 
+        hour, 
+        minute
+      );
+
       final tokenData = await ApiService.bookAppointment(
         widget.providerId, 
         _selectedServiceId!, 
         null, // AI randomized dummy slot or unassigned slot
-        _selectedDate
+        appointmentDate
       );
       
       final token = Appointment.fromJson(tokenData);
@@ -388,8 +419,8 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                   return GestureDetector(
                     onTap: () => setState(() {
                       _selectedDate = date;
-                      _generateMockTimeSlots();
                       _selectedSlotIndex = -1;
+                      _fetchTimeSlots();
                     }),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
@@ -435,7 +466,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
             const SizedBox(height: 28),
 
             // ── AI Recommended Slot ──
-            if (_aiRecommendedSlotIndex != -1)
+            if (!_isFetchingSlots && _aiRecommendedSlotIndex != -1)
               GestureDetector(
                 onTap: () => setState(() => _selectedSlotIndex = _aiRecommendedSlotIndex),
                 child: Container(
@@ -526,8 +557,26 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            GridView.builder(
-              shrinkWrap: true,
+            if (_isFetchingSlots)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (_timeSlots.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Text(
+                    'No time slots available for this date.',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                ),
+              )
+            else
+              GridView.builder(
+                shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -555,15 +604,15 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                       color: !isAvailable
                           ? const Color(0xFFF1F5F9)
                           : isSelected
-                              ? AppTheme.primaryColor
-                              : Theme.of(context).cardColor,
+                              ? dotColor
+                              : dotColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: !isAvailable
                             ? AppTheme.getBorderColor(context)
                             : isSelected
-                                ? AppTheme.primaryColor
-                                : AppTheme.getBorderColor(context),
+                                ? dotColor
+                                : dotColor.withOpacity(0.3),
                       ),
                     ),
                     child: Column(
@@ -581,21 +630,13 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                                     : AppTheme.getTextColor(context),
                           ),
                         ),
-                        const SizedBox(height: 3),
-                        if (isAvailable)
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.white.withOpacity(0.7) : dotColor,
-                              shape: BoxShape.circle,
-                            ),
-                          )
-                        else
+                        if (!isAvailable) ...[
+                          const SizedBox(height: 3),
                           Text(
                             'Full',
                             style: TextStyle(fontSize: 10, color: AppTheme.textLightColor),
                           ),
+                        ]
                       ],
                     ),
                   ),

@@ -19,6 +19,8 @@ import '../screens/user/profile_screen.dart';
 import '../screens/user/help_support_screen.dart';
 import '../screens/user/about_screen.dart';
 import '../screens/user/my_tokens_screen.dart';
+import '../screens/user/user_statistics_screen.dart';
+import '../screens/user/user_ai_analysis_screen.dart';
 
 // Admin screens
 import '../screens/admin/admin_dashboard_screen.dart';
@@ -142,6 +144,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/about',
       builder: (context, state) => const UserThemeWrapper(child: AboutScreen()),
+    ),
+    GoRoute(
+      path: '/statistics',
+      builder: (context, state) => const UserThemeWrapper(child: UserStatisticsScreen()),
+    ),
+    GoRoute(
+      path: '/ai-analysis',
+      builder: (context, state) => const UserThemeWrapper(child: UserAIAnalysisScreen()),
     ),
 
     // ─── Admin Routes ────────────────────────────────────────────────────────

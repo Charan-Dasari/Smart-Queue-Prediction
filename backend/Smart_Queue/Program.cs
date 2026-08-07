@@ -5,6 +5,8 @@ using Smart_Queue.Data;
 using Smart_Queue.Services;
 using System.Text;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +53,9 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<ProviderService>();
 
+// Register Background Services
+builder.Services.AddHostedService<AppointmentCleanupService>();
+
 // Register ML Prediction Service with HttpClient
 builder.Services.AddHttpClient<MlPredictionService>(client =>
 {
@@ -78,6 +83,22 @@ builder.Services.AddCors(options =>
 
 // ── OpenAPI ──
 builder.Services.AddOpenApi();
+
+// ── Response Compression (gzip + brotli) ──
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.SmallestSize;
+});
 
 var app = builder.Build();
 
@@ -117,6 +138,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFlutter");
+app.UseResponseCompression();
 
 app.UseAuthentication();
 app.UseAuthorization();
