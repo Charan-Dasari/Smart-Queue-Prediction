@@ -495,7 +495,7 @@ This project was developed as part of an academic capstone project. All rights r
 ---
 
 <div align="center">
-  <h3>Built with ❤️ by the IntelliQ Team</h3>
+  <h3>Built by the IntelliQ Team</h3>
   <br/>
   <table>
     <tr>
