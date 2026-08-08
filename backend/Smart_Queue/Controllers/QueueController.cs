@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Smart_Queue.Services;
 using System.Security.Claims;
 
+using Smart_Queue.Data;
+using Smart_Queue.Models;
+
 namespace Smart_Queue.Controllers;
 
 [ApiController]
@@ -11,8 +14,13 @@ namespace Smart_Queue.Controllers;
 public class QueueController : ControllerBase
 {
     private readonly QueueService _queueService;
+    private readonly SmartQueueDbContext _db;
 
-    public QueueController(QueueService queueService) => _queueService = queueService;
+    public QueueController(QueueService queueService, SmartQueueDbContext db)
+    {
+        _queueService = queueService;
+        _db = db;
+    }
 
     [Authorize(Roles = "Staff,Admin")]
     [HttpGet("provider")]
@@ -23,6 +31,32 @@ public class QueueController : ControllerBase
 
         var queue = await _queueService.GetProviderQueueAsync(providerId.Value);
         return Ok(queue);
+    }
+
+    [HttpPost("join")]
+    public async Task<IActionResult> JoinQueue([FromBody] Smart_Queue.DTOs.JoinQueueRequest request)
+    {
+        var userId = GetUserId();
+        
+        var token = await _queueService.CreateTokenAsync(userId, request.ProviderId, request.ServiceId);
+
+        var istZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+        var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istZone);
+
+        // Also create a "virtual" appointment for history
+        var appointment = new Appointment
+        {
+            TokenNumber = token.TokenNumber,
+            Date = localNow,
+            Status = AppointmentStatus.InQueue,
+            UserId = userId,
+            ProviderId = request.ProviderId,
+            ServiceId = request.ServiceId
+        };
+        _db.Appointments.Add(appointment);
+        await _db.SaveChangesAsync();
+        
+        return Ok(token);
     }
 
     [HttpGet("my-token")]
@@ -64,12 +98,12 @@ public class QueueController : ControllerBase
 
     [Authorize(Roles = "Staff")]
     [HttpPut("{tokenId}/skip")]
-    public async Task<IActionResult> Skip(Guid tokenId)
+    public async Task<IActionResult> Skip(Guid tokenId, [FromBody] Smart_Queue.DTOs.SkipTokenRequest request)
     {
         var userId = GetUserId();
-        var success = await _queueService.SkipTokenAsync(tokenId, userId);
+        var success = await _queueService.SkipTokenAsync(tokenId, userId, request.Reason);
         if (!success) return BadRequest(new { message = "Cannot skip this token" });
-        return Ok(new { message = "Token skipped and marked absent" });
+        return Ok(new { message = "Token skipped", reason = request.Reason });
     }
 
     [HttpGet("tracking/{tokenId}")]

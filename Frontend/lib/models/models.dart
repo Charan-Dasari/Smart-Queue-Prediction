@@ -188,6 +188,7 @@ class Appointment {
   final DateTime date;
   final TimeSlot? timeSlot;
   final AppointmentStatus status;
+  final String? skipReason;
 
   const Appointment({
     required this.id,
@@ -197,6 +198,7 @@ class Appointment {
     required this.date,
     this.timeSlot,
     required this.status,
+    this.skipReason,
   });
 
   factory Appointment.fromJson(Map<String, dynamic> json) {
@@ -210,6 +212,7 @@ class Appointment {
       status: AppointmentStatus.values.firstWhere(
           (e) => e.name.toLowerCase() == (json['status'] ?? 'upcoming').toString().toLowerCase(),
           orElse: () => AppointmentStatus.upcoming),
+      skipReason: json['skipReason']?.toString(),
     );
   }
 }
@@ -226,6 +229,7 @@ class QueueToken {
   final DateTime createdAt;
   final String priority; // 'normal', 'high', 'urgent'
   final int? counterNumber;
+  final String? skipReason;
 
   const QueueToken({
     required this.id,
@@ -239,6 +243,7 @@ class QueueToken {
     required this.createdAt,
     this.priority = 'normal',
     this.counterNumber,
+    this.skipReason,
   });
 
   factory QueueToken.fromJson(Map<String, dynamic> json) {
@@ -256,6 +261,7 @@ class QueueToken {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       priority: (json['priority'] ?? 'normal').toString().toLowerCase(),
       counterNumber: json['counterNumber'] != null ? json['counterNumber'] as int : null,
+      skipReason: json['skipReason'],
     );
   }
 }

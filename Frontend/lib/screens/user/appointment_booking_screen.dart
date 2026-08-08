@@ -106,9 +106,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         setState(() {
           _provider = ServiceProviderInfo.fromJson(data);
           
-          if (activeServiceNames.isNotEmpty) {
-            _provider!.services.retainWhere((s) => activeServiceNames.contains(s.name.toLowerCase()));
-          }
+          _provider!.services.retainWhere((s) => activeServiceNames.contains(s.name.toLowerCase()));
           
           if (_provider!.services.isNotEmpty) {
             _selectedServiceId = _provider!.services.first.id;

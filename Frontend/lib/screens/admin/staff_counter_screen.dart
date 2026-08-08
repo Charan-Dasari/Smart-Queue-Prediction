@@ -419,7 +419,6 @@ class _StaffCounterScreenState extends State<StaffCounterScreen> {
   }
 
   void _showAddCounterDialog() {
-    final numberController = TextEditingController();
     String? selectedService;
     if (_services.isNotEmpty) {
       selectedService = _services.first['name'];
@@ -434,12 +433,6 @@ class _StaffCounterScreenState extends State<StaffCounterScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: numberController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Counter Number', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 12),
                 if (_services.isNotEmpty)
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Service Name', border: OutlineInputBorder()),
@@ -467,8 +460,7 @@ class _StaffCounterScreenState extends State<StaffCounterScreen> {
                 onPressed: _services.isEmpty ? null : () async {
                   Navigator.pop(ctx);
                   try {
-                    final number = int.tryParse(numberController.text) ?? 1;
-                    await ApiService.createCounter(number, selectedService ?? '');
+                    await ApiService.createCounter(selectedService ?? '');
                     _fetchData();
                     if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Counter created')));
                   } catch (e) {

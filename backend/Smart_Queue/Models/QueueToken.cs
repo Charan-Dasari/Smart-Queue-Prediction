@@ -31,4 +31,7 @@ public class QueueToken
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ServedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
+
+    [MaxLength(200)]
+    public string? SkipReason { get; set; }
 }

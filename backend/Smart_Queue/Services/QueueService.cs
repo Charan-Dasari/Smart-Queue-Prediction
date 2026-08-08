@@ -134,24 +134,38 @@ public class QueueService
 
         // Recalculate positions for remaining tokens in the same service queue
         var remainingTokens = await _db.QueueTokens
+            .Include(t => t.Service)
             .Where(t => t.ProviderId == counter.ProviderId && t.ServiceId == nextToken.ServiceId && t.Status == AppointmentStatus.InQueue)
             .OrderBy(t => t.Position)
             .ToListAsync();
 
         var activeStaff = await _db.ServiceCounters.CountAsync(c => c.ProviderId == counter.ProviderId && c.Status == CounterStatus.Active);
-        
-        // If specific service counter, only count that service's staff? Let's stick to total active staff for simplicity, or count by service if needed.
-        // For simplicity, we just use the provider's active staff as before.
+
+        // Fire ALL ML predictions in parallel (massive speedup!)
+        var mlTasks = remainingTokens.Select((t, i) =>
+            _mlService.PredictWaitTimeAsync(
+                queueLength: i + 1,
+                serviceType: t.Service?.Name ?? "general",
+                priorityLevel: "normal",
+                activeStaffCount: activeStaff > 0 ? activeStaff : 1
+            )
+        ).ToArray();
+
+        int[] predictions;
+        try
+        {
+            predictions = await Task.WhenAll(mlTasks);
+        }
+        catch
+        {
+            // If ML API is completely down, use fallback for all
+            predictions = remainingTokens.Select((_, i) => (i + 1) * 15).ToArray();
+        }
 
         for (int i = 0; i < remainingTokens.Count; i++)
         {
             remainingTokens[i].Position = i + 1;
-            remainingTokens[i].EstimatedWaitMinutes = await _mlService.PredictWaitTimeAsync(
-                queueLength: i + 1,
-                serviceType: remainingTokens[i].Service?.Name ?? "general",
-                priorityLevel: "normal",
-                activeStaffCount: activeStaff > 0 ? activeStaff : 1
-            );
+            remainingTokens[i].EstimatedWaitMinutes = predictions[i];
         }
 
         await _db.SaveChangesAsync();
@@ -203,13 +217,14 @@ public class QueueService
     /// <summary>
     /// Skip absent customer
     /// </summary>
-    public async Task<bool> SkipTokenAsync(Guid tokenId, Guid staffUserId)
+    public async Task<bool> SkipTokenAsync(Guid tokenId, Guid staffUserId, string reason = "Absent — Customer not present")
     {
         var token = await _db.QueueTokens.FindAsync(tokenId);
         if (token == null) return false;
 
         token.Status = AppointmentStatus.Cancelled;
         token.CompletedAt = DateTime.UtcNow;
+        token.SkipReason = reason;
 
         // Clear counter
         var counter = await _db.ServiceCounters
@@ -224,12 +239,15 @@ public class QueueService
             .OrderByDescending(a => a.CreatedAt)
             .FirstOrDefaultAsync();
         if (appointment != null)
+        {
             appointment.Status = AppointmentStatus.Cancelled;
+            appointment.SkipReason = reason;
+        }
 
         // Log activity
         _db.ActivityLogs.Add(new ActivityLog
         {
-            Action = $"Marked {token.TokenNumber} as Absent (Skipped)",
+            Action = $"Skipped {token.TokenNumber}: {reason}",
             ProviderId = token.ProviderId,
             UserId = staffUserId,
         });
@@ -332,6 +350,7 @@ public class QueueService
         Status = token.Status,
         CounterId = token.CounterId,
         CounterNumber = token.Counter?.Number,
+        SkipReason = token.SkipReason,
         CreatedAt = token.CreatedAt,
         ServedAt = token.ServedAt,
         CompletedAt = token.CompletedAt,

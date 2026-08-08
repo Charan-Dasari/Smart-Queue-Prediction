@@ -107,10 +107,60 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
   }
 
   Future<void> _skipAbsent() async {
+    final activeToken = _dashboardData?['currentlyServing'];
+    if (activeToken == null) return;
+
+    // Show skip reason dialog
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        const reasons = [
+          'Absent — Customer not present',
+          'Late arrival — Not available when called',
+          'Incorrect documents — Missing required paperwork',
+          'Wrong service counter — Redirected to correct counter',
+          'Customer requested reschedule',
+          'Unresponsive — No response after multiple calls',
+        ];
+        return AlertDialog(
+          title: const Text('Skip Customer'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Why do you want to skip this customer?',
+                style: TextStyle(fontSize: 14, color: AppTheme.textMutedColor),
+              ),
+              const SizedBox(height: 16),
+              ...reasons.map((r) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => Navigator.pop(ctx, r),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.getBorderColor(ctx)),
+                    ),
+                    child: Text(r, style: const TextStyle(fontSize: 13)),
+                  ),
+                ),
+              )),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ],
+        );
+      },
+    );
+
+    if (reason == null || !mounted) return;
+
     try {
-      final activeToken = _dashboardData?['currentlyServing'];
-      if (activeToken == null) return;
-      
       final queue = await ApiService.getProviderQueue();
       final tokenObj = queue.firstWhere(
         (t) => t['tokenNumber'] == activeToken, 
@@ -118,7 +168,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       );
 
       if (tokenObj != null) {
-        await ApiService.skipToken(tokenObj['id']);
+        await ApiService.skipToken(tokenObj['id'], reason);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Token skipped.'), backgroundColor: AppTheme.warningColor, behavior: SnackBarBehavior.floating),

@@ -53,9 +53,15 @@ public class CountersController : ControllerBase
         var providerId = GetProviderId();
         if (providerId == null) return BadRequest();
 
+        // Auto-increment: next counter number for this provider
+        var maxNumber = await _db.ServiceCounters
+            .Where(c => c.ProviderId == providerId)
+            .Select(c => (int?)c.Number)
+            .MaxAsync() ?? 0;
+
         var counter = new ServiceCounter
         {
-            Number = request.Number,
+            Number = maxNumber + 1,
             ServiceName = request.ServiceName,
             ProviderId = providerId.Value,
             Status = CounterStatus.Offline,

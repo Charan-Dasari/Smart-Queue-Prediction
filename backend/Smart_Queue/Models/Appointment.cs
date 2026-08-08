@@ -27,5 +27,8 @@ public class Appointment
     public Guid? TimeSlotId { get; set; }
     public TimeSlot? TimeSlot { get; set; }
 
+    [MaxLength(200)]
+    public string? SkipReason { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

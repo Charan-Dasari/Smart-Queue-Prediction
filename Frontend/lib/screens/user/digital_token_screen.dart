@@ -214,7 +214,7 @@ class _DigitalTokenScreenState extends State<DigitalTokenScreen> {
 Name: ${user?.name ?? 'User'}
 Email: ${user?.email ?? 'N/A'}
 Booked Date: ${DateFormat('MMM dd, yyyy').format(_appointment!.date)}
-Time Slot: ${_appointment!.timeSlot != null ? '${_appointment!.timeSlot!.startTime} - ${_appointment!.timeSlot!.endTime}' : 'N/A'}
+Time Slot: ${DateFormat('hh:mm a').format(_appointment!.date)}
 Service Type: ${_appointment!.serviceName}
 Provider: ${_appointment!.providerName}
 Status: ${_appointment!.status.name.toUpperCase()}

@@ -103,6 +103,7 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
           labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           indicatorColor: Theme.of(context).brightness == Brightness.dark ? AppTheme.accentColor : AppTheme.primaryColor,
           indicatorWeight: 2.5,
+          isScrollable: true,
           tabs: const [
             Tab(text: 'All'),
             Tab(text: 'Completed'),
@@ -125,7 +126,11 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.history, size: 48, color: AppTheme.textLightColor),
+                              Icon(
+                                Icons.history,
+                                size: 48,
+                                color: AppTheme.textLightColor,
+                              ),
                               const SizedBox(height: 12),
                               Text(
                                 tabIndex == 0
@@ -153,27 +158,34 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
                           final apt = items[index];
                           Color statusColor;
                           String statusLabel;
-                          switch (apt.status) {
-                            case AppointmentStatus.completed:
-                              statusColor = AppTheme.successColor;
-                              statusLabel = 'Completed';
-                              break;
-                            case AppointmentStatus.cancelled:
-                              statusColor = AppTheme.errorColor;
-                              statusLabel = 'Cancelled';
-                              break;
-                            case AppointmentStatus.serving:
-                              statusColor = AppTheme.warningColor;
-                              statusLabel = 'Serving';
-                              break;
-                            case AppointmentStatus.inQueue:
-                              statusColor = AppTheme.accentColor;
-                              statusLabel = 'In Queue';
-                              break;
-                            default:
-                              statusColor = AppTheme.infoColor;
-                              statusLabel = 'Booked';
-                              break;
+                          // Determine status display
+                          final bool isSkipped = apt.status == AppointmentStatus.cancelled && apt.skipReason != null;
+                          if (isSkipped) {
+                            statusColor = Colors.orange;
+                            statusLabel = 'Skipped';
+                          } else {
+                            switch (apt.status) {
+                              case AppointmentStatus.completed:
+                                statusColor = AppTheme.successColor;
+                                statusLabel = 'Completed';
+                                break;
+                              case AppointmentStatus.cancelled:
+                                statusColor = AppTheme.errorColor;
+                                statusLabel = 'Cancelled';
+                                break;
+                              case AppointmentStatus.serving:
+                                statusColor = AppTheme.warningColor;
+                                statusLabel = 'Serving';
+                                break;
+                              case AppointmentStatus.inQueue:
+                                statusColor = AppTheme.accentColor;
+                                statusLabel = 'In Queue';
+                                break;
+                              default:
+                                statusColor = AppTheme.infoColor;
+                                statusLabel = 'Booked';
+                                break;
+                            }
                           }
 
                           final catColor = _getCategoryColor(apt.serviceName);
@@ -238,6 +250,31 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
                                     ),
                                   ],
                                 ),
+                                // Skip reason banner
+                                if (isSkipped && apt.skipReason != null) ...[
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.info_outline, size: 16, color: Colors.orange.shade700),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            apt.skipReason!,
+                                            style: TextStyle(fontSize: 12, color: Colors.orange.shade800, fontWeight: FontWeight.w500),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                                 const Divider(color: AppTheme.dividerColor, height: 24),
                                 Wrap(
                                   spacing: 12,

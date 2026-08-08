@@ -188,6 +188,20 @@ public class ProviderService
             };
             
             _db.Services.AddRange(newServices);
+
+            // Auto-create a default counter for the first service
+            var maxNumber = await _db.ServiceCounters
+                .Where(c => c.ProviderId == providerId)
+                .Select(c => (int?)c.Number)
+                .MaxAsync() ?? 0;
+            _db.ServiceCounters.Add(new ServiceCounter
+            {
+                Number = maxNumber + 1,
+                ServiceName = newServices.First().Name,
+                ProviderId = providerId,
+                Status = CounterStatus.Offline,
+            });
+
             await _db.SaveChangesAsync();
 
             services = newServices.Select(s => new ServiceDto
@@ -203,6 +217,20 @@ public class ProviderService
             };
 
             _db.Services.AddRange(newServices);
+
+            // Auto-create a default counter for General Service
+            var maxNumber = await _db.ServiceCounters
+                .Where(c => c.ProviderId == providerId)
+                .Select(c => (int?)c.Number)
+                .MaxAsync() ?? 0;
+            _db.ServiceCounters.Add(new ServiceCounter
+            {
+                Number = maxNumber + 1,
+                ServiceName = newServices.First().Name,
+                ProviderId = providerId,
+                Status = CounterStatus.Offline,
+            });
+
             await _db.SaveChangesAsync();
 
             services = newServices.Select(s => new ServiceDto
@@ -210,6 +238,15 @@ public class ProviderService
                 Id = s.Id, Name = s.Name, Description = s.Description, AvgDurationMinutes = s.AvgDurationMinutes, Cost = s.Cost, IsActive = s.IsActive, ProviderId = s.ProviderId
             }).ToList();
         }
+
+        // Filter services to only include those that have a staffed counter
+        var staffedServiceNames = await _db.ServiceCounters
+            .Where(c => c.ProviderId == providerId && c.StaffUserId != null)
+            .Select(c => c.ServiceName)
+            .Distinct()
+            .ToListAsync();
+
+        services = services.Where(s => staffedServiceNames.Contains(s.Name)).ToList();
 
         return new ProviderWithServicesDto
         {

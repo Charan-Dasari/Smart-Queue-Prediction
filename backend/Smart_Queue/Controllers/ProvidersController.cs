@@ -41,8 +41,10 @@ public class ProvidersController : ControllerBase
     [HttpGet("{id}/counters")]
     public async Task<IActionResult> GetProviderCounters(Guid id)
     {
+        // Only return counters that have staff assigned (user-facing endpoint)
         var counters = await _db.ServiceCounters
             .Where(c => c.ProviderId == id)
+            .Where(c => c.StaffUserId != null)
             .ToListAsync();
 
         return Ok(counters.Select(c => new CounterDto

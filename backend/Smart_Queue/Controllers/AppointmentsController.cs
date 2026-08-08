@@ -55,6 +55,7 @@ public class AppointmentsController : ControllerBase
                     CrowdLevel = a.TimeSlot.CrowdLevel,
                     AiScore = a.TimeSlot.AiScore,
                 } : null,
+                SkipReason = a.SkipReason,
                 CreatedAt = a.CreatedAt,
             })
             .ToListAsync();
@@ -85,6 +86,7 @@ public class AppointmentsController : ControllerBase
                 Status = a.Status,
                 ProviderId = a.ProviderId,
                 ServiceId = a.ServiceId,
+                SkipReason = a.SkipReason,
                 CreatedAt = a.CreatedAt,
             })
             .ToListAsync();
@@ -191,6 +193,7 @@ public class AppointmentsController : ControllerBase
                 StartTime = appointment.TimeSlot.StartTime,
                 EndTime = appointment.TimeSlot.EndTime,
             } : null,
+            SkipReason = appointment.SkipReason,
             CreatedAt = appointment.CreatedAt,
         });
     }

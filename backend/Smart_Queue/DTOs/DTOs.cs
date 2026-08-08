@@ -172,6 +172,7 @@ public class AppointmentDto
     public Guid ProviderId { get; set; }
     public Guid ServiceId { get; set; }
     public TimeSlotDto? TimeSlot { get; set; }
+    public string? SkipReason { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -202,6 +203,7 @@ public class QueueTokenDto
     public AppointmentStatus Status { get; set; }
     public Guid? CounterId { get; set; }
     public int? CounterNumber { get; set; }
+    public string? SkipReason { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? ServedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
@@ -223,10 +225,14 @@ public class CounterDto
 
 public class CreateCounterRequest
 {
-    public int Number { get; set; }
-
     [MaxLength(200)]
     public string ServiceName { get; set; } = "General";
+}
+
+public class SkipTokenRequest
+{
+    [Required, MaxLength(200)]
+    public string Reason { get; set; } = "Absent — Customer not present";
 }
 
 public class AssignCounterRequest
@@ -241,6 +247,15 @@ public class UpdateCounterStatusRequest
 {
     [Required]
     public CounterStatus Status { get; set; }
+}
+
+public class JoinQueueRequest
+{
+    [Required]
+    public Guid ProviderId { get; set; }
+
+    [Required]
+    public Guid ServiceId { get; set; }
 }
 
 // ── Notification DTOs ──

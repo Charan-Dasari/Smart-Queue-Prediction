@@ -580,8 +580,12 @@ class ApiService {
     }
   }
 
-  static Future<void> skipToken(String tokenId) async {
-    final response = await http.put(Uri.parse('$baseUrl/queue/$tokenId/skip'), headers: _headers);
+  static Future<void> skipToken(String tokenId, String reason) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/queue/$tokenId/skip'),
+      headers: _headers,
+      body: jsonEncode({'reason': reason}),
+    );
     if (response.statusCode != 200) {
       throw Exception('Failed to skip token');
     }
@@ -597,12 +601,11 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> createCounter(int number, String serviceName) async {
+  static Future<Map<String, dynamic>> createCounter(String serviceName) async {
     final response = await http.post(
       Uri.parse('$baseUrl/counters'),
       headers: _headers,
       body: jsonEncode({
-        'number': number,
         'serviceName': serviceName,
       }),
     );
