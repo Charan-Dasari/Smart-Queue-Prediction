@@ -23,10 +23,17 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
       working-directory: Frontend
-    
+        
     - name: Build web
       run: flutter build web --release
       working-directory: Frontend
+    
+    - name: Check build output
+      run: |
+        echo "===== BUILD DIRECTORY ====="
+        ls -lah Frontend/build/web
+        echo "===== INDEX.HTML ====="
+        ls -lah Frontend/build/web/index.html
     
     - name: Deploy to Azure Static Web Apps
       uses: Azure/static-web-apps-deploy@v1
