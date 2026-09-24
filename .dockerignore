@@ -1,0 +1,26 @@
+# See https://aka.ms/dotnet-docker for Docker Hub images
+**/bin/
+**/obj/
+**/publish/
+**/publish-linux/
+**/test-linux/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/build/
+**/*.user
+**/*.suo
+**/deploy.zip
+**/deploy-linux.zip
+**/Migrations_SqlServer/
+**/.env
+**/.env.*
+**/scratch/
+**/doc/
+**/.gemini/
+**/.agents/
+Frontend/
+ml_model/

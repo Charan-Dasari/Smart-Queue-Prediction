@@ -64,10 +64,12 @@ public class DashboardService
         var activeQueues = await _db.QueueTokens.CountAsync(t => t.ProviderId == providerId && (t.Status == AppointmentStatus.InQueue || t.Status == AppointmentStatus.Serving));
         var servedToday = await _db.QueueTokens.CountAsync(t => t.ProviderId == providerId && t.Status == AppointmentStatus.Completed && t.CompletedAt >= todayStart) + 41; // Historical baseline
 
-        var waitTimes = await _db.QueueTokens
+        var waitTimes = (await _db.QueueTokens
             .Where(t => t.ProviderId == providerId && t.Status == AppointmentStatus.Completed && t.CompletedAt >= todayStart && t.ServedAt != null)
-            .Select(t => EF.Functions.DateDiffMinute(t.CreatedAt, t.ServedAt!.Value))
-            .ToListAsync();
+            .Select(t => new { t.CreatedAt, ServedAt = t.ServedAt!.Value })
+            .ToListAsync())
+            .Select(t => (t.ServedAt - t.CreatedAt).TotalMinutes)
+            .ToList();
 
         var avgWait = waitTimes.Count > 0 ? waitTimes.Average() : 14.0; // Fallback historical avg wait
 

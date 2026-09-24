@@ -13,10 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ──
 builder.Services.AddDbContext<SmartQueueDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        sqlServerOptionsAction: sqlOptions =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        npgsqlOptions =>
         {
-            sqlOptions.CommandTimeout(120);
+            npgsqlOptions.CommandTimeout(120);
         }));
 
 // ── JWT Authentication ──

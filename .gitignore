@@ -26,3 +26,15 @@ Thumbs.db
 # Scratch / Temporary
 scratch/
 doc/
+
+# Secrets / Environment
+.env
+.env.*
+*.env
+
+# Publish / Deploy artifacts
+**/publish/
+**/publish-linux/
+**/test-linux/
+**/deploy.zip
+**/deploy-linux.zip
