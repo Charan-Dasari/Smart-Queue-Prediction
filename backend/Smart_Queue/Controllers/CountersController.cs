@@ -84,8 +84,12 @@ public class CountersController : ControllerBase
     [HttpPut("{id}/assign")]
     public async Task<IActionResult> Assign(Guid id, [FromBody] AssignCounterRequest request)
     {
+        var providerId = GetProviderId();
+        if (providerId == null) return BadRequest();
+
         var counter = await _db.ServiceCounters.FindAsync(id);
         if (counter == null) return NotFound();
+        if (counter.ProviderId != providerId) return Forbid();
 
         if (request.StaffUserId.HasValue)
         {
@@ -109,8 +113,12 @@ public class CountersController : ControllerBase
     [HttpPut("{id}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateCounterStatusRequest request)
     {
+        var providerId = GetProviderId();
+        if (providerId == null) return BadRequest();
+
         var counter = await _db.ServiceCounters.FindAsync(id);
         if (counter == null) return NotFound();
+        if (counter.ProviderId != providerId) return Forbid();
 
         counter.Status = request.Status;
         await _db.SaveChangesAsync();
@@ -122,8 +130,12 @@ public class CountersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
+        var providerId = GetProviderId();
+        if (providerId == null) return BadRequest();
+
         var counter = await _db.ServiceCounters.FindAsync(id);
         if (counter == null) return NotFound();
+        if (counter.ProviderId != providerId) return Forbid();
 
         _db.ServiceCounters.Remove(counter);
         await _db.SaveChangesAsync();

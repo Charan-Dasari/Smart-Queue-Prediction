@@ -41,7 +41,7 @@ public class StaffController : ControllerBase
         var providerId = GetProviderId();
         if (providerId == null) return BadRequest();
 
-        var provider = await _db.Places.FindAsync(providerId);
+        var provider = await _db.ServiceProviders.FindAsync(providerId);
         if (provider == null) return NotFound();
 
         var sanitizedFirstName = request.FirstName.Trim().ToLower().Replace(" ", "");

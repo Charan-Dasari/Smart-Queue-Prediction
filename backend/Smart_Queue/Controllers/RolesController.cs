@@ -43,8 +43,12 @@ public class RolesController : ControllerBase
     [HttpPut("{userId}")]
     public async Task<IActionResult> UpdateRole(Guid userId, [FromBody] UpdateRoleRequest request)
     {
+        var providerId = GetProviderId();
+        if (providerId == null) return BadRequest();
+
         var user = await _db.Users.FindAsync(userId);
         if (user == null) return NotFound();
+        if (user.ProviderId != providerId) return Forbid();
 
         // Only allow Admin and Staff roles for provider users
         if (request.Role != UserRole.Admin && request.Role != UserRole.Staff)
