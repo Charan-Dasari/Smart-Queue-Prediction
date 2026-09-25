@@ -6,8 +6,7 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 
 class ApiService {
   static String get baseUrl {
-    // Always use the live Azure API for testing since the local backend is no longer running
-    return 'https://intelliq-api.azurewebsites.net/api';
+    return 'https://smart-queue-prediction.onrender.com/api';
   }
 
   static String? token;
