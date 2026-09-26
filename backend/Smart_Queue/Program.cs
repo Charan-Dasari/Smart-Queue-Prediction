@@ -109,21 +109,8 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
     await DbSeeder.SeedAsync(db); // Seed test users + providers synchronously
 
-    // Import CSV datasets into Places table asynchronously in background so app starts immediately
-    var datasetsFolder = Path.Combine(AppContext.BaseDirectory, "Datasets_Clean");
-    if (Directory.Exists(datasetsFolder))
-    {
-        _ = Task.Run(async () =>
-        {
-            using var bgScope = app.Services.CreateScope();
-            var bgDb = bgScope.ServiceProvider.GetRequiredService<SmartQueueDbContext>();
-            await PlaceSeeder.SeedPlacesAsync(bgDb, datasetsFolder);
-        });
-    }
-    else
-    {
-        Console.WriteLine($"[PlaceSeeder] Datasets folder not found at: {datasetsFolder}");
-    }
+    // Note: Automatic CSV dataset import into Places table has been disabled.
+    // Places can be queried or populated independently if needed.
 }
 
 // ── Middleware Pipeline ──
