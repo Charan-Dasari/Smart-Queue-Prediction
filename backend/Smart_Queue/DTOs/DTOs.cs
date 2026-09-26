@@ -104,6 +104,24 @@ public class CreateProviderRequest
     public Guid PlaceId { get; set; }
 }
 
+public class CreateManualProviderRequest
+{
+    [Required, MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required]
+    public string Category { get; set; } = "Hospital";
+
+    [MaxLength(200)]
+    public string State { get; set; } = string.Empty;
+
+    [MaxLength(200)]
+    public string City { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    public string Address { get; set; } = string.Empty;
+}
+
 public class ProviderWithServicesDto : ProviderDto
 {
     public List<ServiceDto> Services { get; set; } = new();

@@ -34,7 +34,7 @@ public class PlacesController : ControllerBase
         [FromQuery] int pageSize = 50)
     {
         // Build a cache key from all the query parameters
-        var cacheKey = $"places_{category}_{state}_{city}_{q}_{page}_{pageSize}";
+        var cacheKey = $"places_{category?.ToLowerInvariant()}_{state?.ToLowerInvariant()}_{city?.ToLowerInvariant()}_{q?.ToLowerInvariant()}_{page}_{pageSize}";
 
         if (_cache.TryGetValue(cacheKey, out object? cachedResult))
         {
@@ -44,17 +44,29 @@ public class PlacesController : ControllerBase
         var query = _db.Places.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrEmpty(category) && category != "All")
-            query = query.Where(p => p.Category == category);
+            query = query.Where(p => EF.Functions.ILike(p.Category, category));
 
         if (!string.IsNullOrEmpty(q))
-            query = query.Where(p => p.Name.Contains(q) || p.City.Contains(q) || p.State.Contains(q));
+        {
+            var pattern = $"%{q}%";
+            query = query.Where(p =>
+                EF.Functions.ILike(p.Name, pattern) ||
+                EF.Functions.ILike(p.City, pattern) ||
+                EF.Functions.ILike(p.State, pattern));
+        }
 
         // Push state/city filtering into SQL instead of loading all rows into memory
         if (!string.IsNullOrEmpty(state))
-            query = query.Where(p => p.State.ToLower().Contains(state.ToLower()));
+        {
+            var statePattern = $"%{state}%";
+            query = query.Where(p => EF.Functions.ILike(p.State, statePattern));
+        }
 
         if (!string.IsNullOrEmpty(city))
-            query = query.Where(p => p.City.ToLower().Contains(city.ToLower()));
+        {
+            var cityPattern = $"%{city}%";
+            query = query.Where(p => EF.Functions.ILike(p.City, cityPattern));
+        }
 
         var totalCount = await query.CountAsync();
 

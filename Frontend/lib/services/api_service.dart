@@ -40,6 +40,17 @@ class ApiService {
     return headers;
   }
 
+  static void Function()? onSessionExpired;
+
+  static void handleResponseError(http.Response response, String fallbackMessage, [Uri? uri]) {
+    if (response.statusCode == 401 && (uri == null || !uri.path.endsWith('/auth/login'))) {
+      clearToken();
+      onSessionExpired?.call();
+      throw Exception('Session expired. Please log in again.');
+    }
+    throw Exception(_extractError(response.body, fallbackMessage));
+  }
+
   static String _extractError(String body, String fallback) {
     try {
       final decoded = jsonDecode(body);
@@ -72,11 +83,13 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getMe() async {
-    final response = await http.get(Uri.parse('$baseUrl/auth/me'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/auth/me');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to get profile');
+      handleResponseError(response, 'Failed to get profile', uri);
+      return {};
     }
   }
 
@@ -131,6 +144,33 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to create provider: ${response.body}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> createManualProvider({
+    required String name,
+    required String category,
+    String state = '',
+    String city = '',
+    String address = '',
+  }) async {
+    final uri = Uri.parse('$baseUrl/providers/manual');
+    final response = await http.post(
+      uri,
+      headers: _headers,
+      body: jsonEncode({
+        'name': name,
+        'category': category,
+        'state': state,
+        'city': city,
+        'address': address,
+      }),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      handleResponseError(response, 'Failed to create organization', uri);
+      return {};
     }
   }
 
@@ -247,11 +287,13 @@ class ApiService {
   }
 
   static Future<List<dynamic>> getMyActiveTokens() async {
-    final response = await http.get(Uri.parse('$baseUrl/queue/my-tokens'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/queue/my-tokens');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load active tokens');
+      handleResponseError(response, 'Failed to load active tokens', uri);
+      return [];
     }
   }
 
@@ -369,11 +411,13 @@ class ApiService {
 
   // ── Appointments ──
   static Future<List<dynamic>> getMyAppointments() async {
-    final response = await http.get(Uri.parse('$baseUrl/appointments/my'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/appointments/my');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load appointments');
+      handleResponseError(response, 'Failed to load appointments', uri);
+      return [];
     }
   }
 
@@ -470,48 +514,58 @@ class ApiService {
 
   // ── Dashboard ──
   static Future<Map<String, dynamic>> getUserDashboard() async {
-    final response = await http.get(Uri.parse('$baseUrl/dashboard/user'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/dashboard/user');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load dashboard');
+      handleResponseError(response, 'Failed to load dashboard', uri);
+      return {};
     }
   }
   
   static Future<Map<String, dynamic>> getAdminDashboard() async {
-    final response = await http.get(Uri.parse('$baseUrl/dashboard/admin'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/dashboard/admin');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load admin dashboard');
+      handleResponseError(response, 'Failed to load admin dashboard', uri);
+      return {};
     }
   }
   
   static Future<Map<String, dynamic>> getStaffDashboard() async {
-    final response = await http.get(Uri.parse('$baseUrl/dashboard/staff'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/dashboard/staff');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load staff dashboard');
+      handleResponseError(response, 'Failed to load staff dashboard', uri);
+      return {};
     }
   }
   
   static Future<Map<String, dynamic>> getSuperAdminDashboard() async {
-    final response = await http.get(Uri.parse('$baseUrl/dashboard/super-admin'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/dashboard/super-admin');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load super admin dashboard');
+      handleResponseError(response, 'Failed to load super admin dashboard', uri);
+      return {};
     }
   }
   
   // ── Notifications ──
   static Future<List<dynamic>> getNotifications() async {
-    final response = await http.get(Uri.parse('$baseUrl/notifications'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/notifications');
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load notifications');
+      handleResponseError(response, 'Failed to load notifications', uri);
+      return [];
     }
   }
 
@@ -562,31 +616,35 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>?> callNext() async {
-    final response = await http.post(Uri.parse('$baseUrl/queue/call-next'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/queue/call-next');
+    final response = await http.post(uri, headers: _headers);
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       if (json['message'] != null) return null; // No customers
       return json;
     } else {
-      throw Exception('Failed to call next');
+      handleResponseError(response, 'Failed to call next', uri);
+      return null;
     }
   }
 
   static Future<void> completeToken(String tokenId) async {
-    final response = await http.put(Uri.parse('$baseUrl/queue/$tokenId/complete'), headers: _headers);
+    final uri = Uri.parse('$baseUrl/queue/$tokenId/complete');
+    final response = await http.put(uri, headers: _headers);
     if (response.statusCode != 200) {
-      throw Exception('Failed to complete token');
+      handleResponseError(response, 'Failed to complete token', uri);
     }
   }
 
   static Future<void> skipToken(String tokenId, String reason) async {
+    final uri = Uri.parse('$baseUrl/queue/$tokenId/skip');
     final response = await http.put(
-      Uri.parse('$baseUrl/queue/$tokenId/skip'),
+      uri,
       headers: _headers,
       body: jsonEncode({'reason': reason}),
     );
     if (response.statusCode != 200) {
-      throw Exception('Failed to skip token');
+      handleResponseError(response, 'Failed to skip token', uri);
     }
   }
 

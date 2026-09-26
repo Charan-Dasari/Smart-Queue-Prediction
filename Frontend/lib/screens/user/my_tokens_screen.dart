@@ -14,20 +14,20 @@ class MyTokensScreen extends StatefulWidget {
 
 class _MyTokensScreenState extends State<MyTokensScreen> {
   bool _isLoading = true;
-  List<Appointment> _appointments = [];
+  List<QueueToken> _tokens = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchAppointments();
+    _fetchTokens();
   }
 
-  Future<void> _fetchAppointments() async {
+  Future<void> _fetchTokens() async {
     try {
-      final data = await ApiService.getMyAppointments();
+      final data = await ApiService.getMyActiveTokens();
       if (mounted) {
         setState(() {
-          _appointments = data.map((e) => Appointment.fromJson(e)).toList();
+          _tokens = data.map((e) => QueueToken.fromJson(e as Map<String, dynamic>)).toList();
           _isLoading = false;
         });
       }
@@ -43,7 +43,9 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final activeAppointments = _appointments.where((a) => a.status != AppointmentStatus.completed && a.status != AppointmentStatus.cancelled).toList();
+    final activeTokens = _tokens.where((t) => 
+        t.status != AppointmentStatus.completed && 
+        t.status != AppointmentStatus.cancelled).toList();
 
     return UserThemeWrapper(
       child: Scaffold(
@@ -58,7 +60,7 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
               icon: const Icon(Icons.refresh_rounded, size: 22),
               onPressed: () {
                 setState(() => _isLoading = true);
-                _fetchAppointments();
+                _fetchTokens();
               },
             ),
             const SizedBox(width: 8),
@@ -68,14 +70,14 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
           children: [
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : activeAppointments.isEmpty
+                : activeTokens.isEmpty
                     ? _buildEmptyState(context)
                     : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-                        itemCount: activeAppointments.length,
+                        itemCount: activeTokens.length,
                         itemBuilder: (context, index) {
-                          final appointment = activeAppointments[index];
-                          return _buildTokenCard(context, appointment);
+                          final token = activeTokens[index];
+                          return _buildTokenCard(context, token);
                         },
                       ),
             const Positioned(
@@ -139,11 +141,11 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
     );
   }
 
-  Widget _buildTokenCard(BuildContext context, Appointment appointment) {
+  Widget _buildTokenCard(BuildContext context, QueueToken token) {
     final theme = Theme.of(context);
-    final isServing = appointment.status == AppointmentStatus.serving;
-    final isWaiting = appointment.status == AppointmentStatus.inQueue;
-    final isCancelled = appointment.status == AppointmentStatus.cancelled;
+    final isServing = token.status == AppointmentStatus.serving;
+    final isWaiting = token.status == AppointmentStatus.inQueue;
+    final isCancelled = token.status == AppointmentStatus.cancelled;
 
     final statusColor = isCancelled ? AppTheme.errorColor : isServing ? AppTheme.successColor : isWaiting ? AppTheme.warningColor : AppTheme.infoColor;
 
@@ -162,8 +164,8 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () async {
-            await context.push('/token/${appointment.id}');
-            _fetchAppointments();
+            await context.push('/token/${token.id}');
+            _fetchTokens();
           },
           child: Padding(
             padding: const EdgeInsets.all(18),
@@ -184,12 +186,12 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        appointment.providerName,
+                        token.providerName,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: theme.textTheme.bodyLarge?.color),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        appointment.serviceName,
+                        token.serviceName,
                         style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color),
                       ),
                       const SizedBox(height: 10),
@@ -202,7 +204,7 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              'Token ${appointment.tokenNumber}',
+                              'Token ${token.tokenNumber}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -218,7 +220,7 @@ class _MyTokensScreenState extends State<MyTokensScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              appointment.status.name.toUpperCase(),
+                              token.status.name.toUpperCase(),
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,

@@ -82,6 +82,85 @@ public class ProviderService
     }
 
     /// <summary>
+    /// Create a new provider manually (not from Places dataset) and auto-generate admin credentials
+    /// </summary>
+    public async Task<(ProviderDto Provider, string AdminEmail, string AdminPassword)> CreateManualProviderAsync(CreateManualProviderRequest request)
+    {
+        // Parse category
+        if (!Enum.TryParse<ServiceCategory>(request.Category, true, out var serviceCategory))
+        {
+            serviceCategory = ServiceCategory.Other;
+        }
+
+        // Build address from City + State if address is empty
+        var address = !string.IsNullOrWhiteSpace(request.Address)
+            ? request.Address
+            : $"{request.City}, {request.State}".Trim(',', ' ');
+
+        // Use a transaction for atomicity
+        using var transaction = await _db.Database.BeginTransactionAsync();
+        try
+        {
+            var provider = new ServiceProvider
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                Category = serviceCategory,
+                Address = address,
+                Rating = 5.0,
+                IsActive = true,
+            };
+
+            _db.ServiceProviders.Add(provider);
+
+            // Auto-generate admin using the SAME convention as dataset-based onboarding
+            var sanitizedName = new string(request.Name.Where(c => char.IsLetterOrDigit(c)).ToArray()).ToLower();
+            var adminEmail = $"{sanitizedName}admin@intelliq.com";
+            var adminPassword = $"{sanitizedName}@123";
+
+            // Check for duplicate admin email
+            var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+            if (existingUser != null)
+            {
+                throw new Exception($"An admin with email '{adminEmail}' already exists. Choose a different organization name.");
+            }
+
+            var adminUser = new User
+            {
+                Name = $"{request.Name} Admin",
+                Email = adminEmail,
+                Mobile = "+91 99900 00000",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                Role = UserRole.Admin,
+                ProviderId = provider.Id,
+            };
+
+            _db.Users.Add(adminUser);
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            var dto = new ProviderDto
+            {
+                Id = provider.Id,
+                Name = provider.Name,
+                Category = provider.Category,
+                Address = provider.Address,
+                Rating = provider.Rating,
+                IsActive = provider.IsActive,
+                AdminEmail = adminEmail,
+                CreatedAt = provider.CreatedAt,
+            };
+
+            return (dto, adminEmail, adminPassword);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Delete a provider and all associated users
     /// </summary>
     public async Task<bool> DeleteProviderAsync(Guid providerId)

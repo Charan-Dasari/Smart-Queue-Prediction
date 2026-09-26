@@ -62,7 +62,7 @@ class AboutScreen extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Version 0.9 • Enterprise Edition',
+                'Version 1.0 • Enterprise Edition',
                 style: TextStyle(fontSize: 14, color: theme.textTheme.bodyMedium?.color),
               ),
               const SizedBox(height: 10),

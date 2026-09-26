@@ -177,6 +177,25 @@ public class ProvidersController : ControllerBase
     }
 
     [Authorize(Roles = "SuperAdmin")]
+    [HttpPost("manual")]
+    public async Task<IActionResult> CreateManual([FromBody] CreateManualProviderRequest request)
+    {
+        try
+        {
+            var (provider, adminEmail, adminPassword) = await _providerService.CreateManualProviderAsync(request);
+            return Ok(new
+            {
+                provider,
+                credentials = new { email = adminEmail, password = adminPassword }
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize(Roles = "SuperAdmin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intelliq/models/models.dart';
 import '../utils/theme.dart';
+import '../utils/router.dart';
 import 'api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -17,6 +18,16 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _initAuth() async {
     await ApiService.init();
+    ApiService.onSessionExpired = () {
+      logout();
+      try {
+        if (appRouter.routerDelegate.currentConfiguration.uri.toString() != '/login') {
+          appRouter.go('/login');
+        }
+      } catch (_) {
+        appRouter.go('/login');
+      }
+    };
     if (ApiService.token != null) {
       try {
         await _fetchProfile();

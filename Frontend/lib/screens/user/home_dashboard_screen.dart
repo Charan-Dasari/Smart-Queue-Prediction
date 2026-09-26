@@ -66,25 +66,42 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 
   Future<void> _loadData() async {
-    try {
-      final statsData = await ApiService.getUserDashboard();
-      final tokenData = await ApiService.getMyActiveTokens();
-      final notifData = await ApiService.getNotifications();
+    DashboardStats? newStats;
+    List<QueueToken>? newTokens;
+    List<AppNotification>? newNotifs;
 
-      if (mounted) {
-        setState(() {
-          _stats = DashboardStats.fromJson(statsData);
-          _activeTokens = tokenData.map((t) => QueueToken.fromJson(t as Map<String, dynamic>)).toList();
-          _notifications = notifData
+    await Future.wait([
+      (() async {
+        try {
+          final statsData = await ApiService.getUserDashboard();
+          newStats = DashboardStats.fromJson(statsData);
+        } catch (_) {}
+      })(),
+      (() async {
+        try {
+          final tokenData = await ApiService.getMyActiveTokens();
+          newTokens = tokenData
+              .map((t) => QueueToken.fromJson(t as Map<String, dynamic>))
+              .toList();
+        } catch (_) {}
+      })(),
+      (() async {
+        try {
+          final notifData = await ApiService.getNotifications();
+          newNotifs = notifData
               .map((n) => AppNotification.fromJson(n as Map<String, dynamic>))
               .toList();
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+        } catch (_) {}
+      })(),
+    ]);
+
+    if (mounted) {
+      setState(() {
+        if (newStats != null) _stats = newStats;
+        if (newTokens != null) _activeTokens = newTokens!;
+        if (newNotifs != null) _notifications = newNotifs!;
+        _isLoading = false;
+      });
     }
   }
 

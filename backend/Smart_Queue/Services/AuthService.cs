@@ -137,7 +137,7 @@ public class AuthService
         };
 
         var expiration = isWeb 
-            ? DateTime.UtcNow.AddMinutes(30) 
+            ? DateTime.UtcNow.AddDays(7) 
             : DateTime.UtcNow.AddYears(1);
 
         var token = new JwtSecurityToken(

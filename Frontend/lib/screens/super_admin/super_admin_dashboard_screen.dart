@@ -552,13 +552,28 @@ class ProviderOnboardingDialog extends StatefulWidget {
   State<ProviderOnboardingDialog> createState() => _ProviderOnboardingDialogState();
 }
 
+enum _OnboardingMode { dataset, manual }
+
 class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
+  // ── Shared ──
+  _OnboardingMode _mode = _OnboardingMode.dataset;
+
+  // ── Dataset Search State ──
   List<dynamic> _places = [];
   bool _isLoading = false;
   String _error = '';
   String _selectedCategory = 'All';
   Timer? _debounce;
   String _lastQuery = '';
+
+  // ── Manual Creation State ──
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _stateController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _addressController = TextEditingController();
+  String _manualCategory = 'Hospital';
+  bool _isCreating = false;
 
   @override
   void initState() {
@@ -600,6 +615,10 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _nameController.dispose();
+    _stateController.dispose();
+    _cityController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -641,6 +660,133 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
     }
   }
 
+  Future<void> _createManualOrganization() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isCreating = true);
+    try {
+      final result = await ApiService.createManualProvider(
+        name: _nameController.text.trim(),
+        category: _manualCategory,
+        state: _stateController.text.trim(),
+        city: _cityController.text.trim(),
+        address: _addressController.text.trim(),
+      );
+      if (mounted) {
+        final creds = result['credentials'];
+        final providerData = result['provider'];
+        Navigator.pop(context, true);
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) {
+            final theme = Theme.of(ctx);
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.successColor.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_circle_rounded, color: AppTheme.successColor, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text('Organization Created!', style: TextStyle(color: AppTheme.successColor, fontSize: 18, fontWeight: FontWeight.w800)),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Organization: ${providerData?['name'] ?? _nameController.text.trim()}',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: theme.textTheme.bodyLarge?.color),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF1E1A2E)
+                          : const Color(0xFFF8F7FF),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.key_rounded, size: 14, color: AppTheme.primaryColor),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Admin Credentials',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.primaryColor, letterSpacing: 0.5),
+                            ),
+                            const Spacer(),
+                            InkWell(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: 'Email: ${creds['email']}\nPassword: ${creds['password']}'));
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  const SnackBar(content: Text('Credentials copied to clipboard')),
+                                );
+                              },
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.copy_rounded, color: AppTheme.primaryColor, size: 13),
+                                  SizedBox(width: 4),
+                                  Text('Copy', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primaryColor)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        SelectableText(
+                          'Email: ${creds['email']}',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.textTheme.bodyLarge?.color),
+                        ),
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          'Password: ${creds['password']}',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.textTheme.bodyMedium?.color),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text('Done'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isCreating = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppTheme.errorColor),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -669,89 +815,385 @@ class _ProviderOnboardingDialogState extends State<ProviderOnboardingDialog> {
                 IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.pop(context)),
               ],
             ),
-            Text(
-              'Search directory to grant provider platform access & credentials.',
-              style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color),
-            ),
-            const SizedBox(height: 14),
-            SmartSearchBar(
-              onPlaceSelected: (place) => _onboardPlace(place),
-              onQuerySubmitted: (query) {
-                _lastQuery = query;
-                _searchPlaces(query);
-              },
-            ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            const SizedBox(height: 10),
+
+            // ── Mode Toggle ──
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF1E1A2E)
+                    : const Color(0xFFF3F1FA),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              padding: const EdgeInsets.all(4),
               child: Row(
-                children: ['All', 'Hospital', 'Bank', 'College', 'Restaurant'].map((cat) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ChoiceChip(
-                      label: Text(cat, style: const TextStyle(fontSize: 12)),
-                      selected: _selectedCategory == cat,
-                      onSelected: (selected) => _onCategorySelected(cat),
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _mode = _OnboardingMode.dataset),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: _mode == _OnboardingMode.dataset
+                              ? AppTheme.primaryColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_rounded,
+                              size: 16,
+                              color: _mode == _OnboardingMode.dataset
+                                  ? Colors.white
+                                  : theme.textTheme.bodyMedium?.color,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Search Directory',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _mode == _OnboardingMode.dataset
+                                    ? Colors.white
+                                    : theme.textTheme.bodyMedium?.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _mode = _OnboardingMode.manual),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: _mode == _OnboardingMode.manual
+                              ? AppTheme.primaryColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_business_rounded,
+                              size: 16,
+                              color: _mode == _OnboardingMode.manual
+                                  ? Colors.white
+                                  : theme.textTheme.bodyMedium?.color,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'New Organization',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _mode == _OnboardingMode.manual
+                                    ? Colors.white
+                                    : theme.textTheme.bodyMedium?.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 14),
+
+            // ── Content based on mode ──
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _error.isNotEmpty
-                      ? Center(child: Text(_error, style: const TextStyle(color: AppTheme.errorColor)))
-                      : _places.isEmpty
-                          ? Center(child: Text('No results found. Type to search.', style: TextStyle(color: theme.textTheme.bodyMedium?.color)))
-                          : ListView.separated(
-                              itemCount: _places.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final p = _places[index];
-                                return Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: theme.cardColor,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: AppTheme.getBorderColor(context)),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: _mode == _OnboardingMode.dataset
+                  ? _buildDatasetSearch(theme)
+                  : _buildManualForm(theme),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Dataset Search View (existing behavior) ──
+  Widget _buildDatasetSearch(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Search directory to grant provider platform access & credentials.',
+          style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color),
+        ),
+        const SizedBox(height: 10),
+        SmartSearchBar(
+          onPlaceSelected: (place) => _onboardPlace(place),
+          onQuerySubmitted: (query) {
+            _lastQuery = query;
+            _searchPlaces(query);
+          },
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: ['All', 'Hospital', 'Bank', 'College', 'Restaurant'].map((cat) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: ChoiceChip(
+                  label: Text(cat, style: const TextStyle(fontSize: 12)),
+                  selected: _selectedCategory == cat,
+                  onSelected: (selected) => _onCategorySelected(cat),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Expanded(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error.isNotEmpty
+                  ? Center(child: Text(_error, style: const TextStyle(color: AppTheme.errorColor)))
+                  : _places.isEmpty
+                      ? Center(child: Text('No results found. Type to search.', style: TextStyle(color: theme.textTheme.bodyMedium?.color)))
+                      : ListView.separated(
+                          itemCount: _places.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final p = _places[index];
+                            return Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.cardColor,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: AppTheme.getBorderColor(context)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              p['name'] ?? 'Unknown',
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: theme.textTheme.bodyLarge?.color),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          ElevatedButton(
-                                            onPressed: () => _onboardPlace(p),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppTheme.successColor,
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                            ),
-                                            child: const Text('Grant Access', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                                          ),
-                                        ],
+                                      Expanded(
+                                        child: Text(
+                                          p['name'] ?? 'Unknown',
+                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: theme.textTheme.bodyLarge?.color),
+                                        ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${p['category']} • ${p['address']}',
-                                        style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton(
+                                        onPressed: () => _onboardPlace(p),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppTheme.successColor,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        ),
+                                        child: const Text('Grant Access', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                                       ),
                                     ],
                                   ),
-                                );
-                              },
-                            ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${p['category']} • ${p['address']}',
+                                    style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+        ),
+      ],
+    );
+  }
+
+  // ── Manual Organization Creation Form ──
+  Widget _buildManualForm(ThemeData theme) {
+    final categories = ['Hospital', 'Bank', 'College', 'Restaurant', 'GovtOffice', 'Hotel', 'Other'];
+
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Create a new organization not in the directory.',
+              style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color),
+            ),
+            const SizedBox(height: 16),
+
+            // Organization Name
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Organization Name *',
+                hintText: 'e.g. City General Hospital',
+                prefixIcon: const Icon(Icons.business_rounded, size: 20),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: theme.dividerColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Organization name is required';
+                if (v.trim().length < 3) return 'Name must be at least 3 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Category Dropdown
+            DropdownButtonFormField<String>(
+              value: _manualCategory,
+              decoration: InputDecoration(
+                labelText: 'Category *',
+                prefixIcon: const Icon(Icons.category_rounded, size: 20),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: theme.dividerColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+              onChanged: (v) => setState(() => _manualCategory = v ?? 'Hospital'),
+            ),
+            const SizedBox(height: 16),
+
+            // State & City Row
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _stateController,
+                    decoration: InputDecoration(
+                      labelText: 'State',
+                      hintText: 'e.g. Telangana',
+                      prefixIcon: const Icon(Icons.map_rounded, size: 20),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: theme.dividerColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _cityController,
+                    decoration: InputDecoration(
+                      labelText: 'City',
+                      hintText: 'e.g. Hyderabad',
+                      prefixIcon: const Icon(Icons.location_city_rounded, size: 20),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: theme.dividerColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Address
+            TextFormField(
+              controller: _addressController,
+              decoration: InputDecoration(
+                labelText: 'Address',
+                hintText: 'e.g. Road No. 5, Banjara Hills',
+                prefixIcon: const Icon(Icons.place_rounded, size: 20),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: theme.dividerColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 10),
+
+            // Info note
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.15)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline_rounded, size: 16, color: AppTheme.primaryColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Admin credentials will be auto-generated using the same format as directory onboarding.',
+                      style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color, height: 1.3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Create Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: _isCreating ? null : _createManualOrganization,
+                icon: _isCreating
+                    ? const SizedBox(
+                        width: 18, height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.add_business_rounded, size: 20),
+                label: Text(
+                  _isCreating ? 'Creating...' : 'Create Organization',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
             ),
           ],
         ),
