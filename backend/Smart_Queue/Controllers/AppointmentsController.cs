@@ -114,10 +114,14 @@ public class AppointmentsController : ControllerBase
             var queueToken = await _queueService.CreateTokenAsync(userId, request.ProviderId, request.ServiceId);
 
             // Create appointment
+            var appointmentDate = request.Date.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(request.Date, DateTimeKind.Utc)
+                : request.Date.ToUniversalTime();
+
             var appointment = new Appointment
             {
                 TokenNumber = queueToken.TokenNumber,
-                Date = request.Date,
+                Date = appointmentDate,
                 Status = AppointmentStatus.Upcoming,
                 UserId = userId,
                 ProviderId = request.ProviderId,

@@ -166,7 +166,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
       if (isPM && hour != 12) hour += 12;
       if (!isPM && hour == 12) hour = 0;
       
-      final appointmentDate = DateTime(
+      final appointmentDate = DateTime.utc(
         _selectedDate.year, 
         _selectedDate.month, 
         _selectedDate.day, 

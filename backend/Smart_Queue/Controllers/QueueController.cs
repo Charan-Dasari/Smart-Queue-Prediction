@@ -40,14 +40,11 @@ public class QueueController : ControllerBase
         
         var token = await _queueService.CreateTokenAsync(userId, request.ProviderId, request.ServiceId);
 
-        var istZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
-        var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istZone);
-
         // Also create a "virtual" appointment for history
         var appointment = new Appointment
         {
             TokenNumber = token.TokenNumber,
-            Date = localNow,
+            Date = DateTime.UtcNow,
             Status = AppointmentStatus.InQueue,
             UserId = userId,
             ProviderId = request.ProviderId,
