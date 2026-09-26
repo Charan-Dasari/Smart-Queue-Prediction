@@ -35,7 +35,13 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   }
 
   Future<void> _fetchTimeSlots() async {
-    if (_selectedServiceId == null) return;
+    if (_selectedServiceId == null) {
+      setState(() {
+        _isFetchingSlots = false;
+        _timeSlots.clear();
+      });
+      return;
+    }
     
     setState(() {
       _isFetchingSlots = true;

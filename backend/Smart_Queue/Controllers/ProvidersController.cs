@@ -81,8 +81,15 @@ public class ProvidersController : ControllerBase
         var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istZone);
         
         // Get all appointments for this provider, service, and specific date
+        var startOfDay = DateTime.SpecifyKind(requestedDate.Date, DateTimeKind.Utc);
+        var endOfDay = startOfDay.AddDays(1);
+
         var appointmentsForDate = await _db.Appointments
-            .Where(a => a.ProviderId == id && a.ServiceId == serviceId && a.Date.Date == requestedDate.Date)
+            .Where(a =>
+                a.ProviderId == id &&
+                a.ServiceId == serviceId &&
+                a.Date >= startOfDay &&
+                a.Date < endOfDay)
             .ToListAsync();
 
         int maxCapacityPerSlot = 5; // e.g. 5 appointments max per 30-min slot
